@@ -26,4 +26,16 @@ class UserApiServices {
       print(e);
     }
   }
+
+  static Future<dynamic> checkUsernameAvailability({required username}) async {
+    try {
+      final response =
+          await RestApiServices.postRequest('users/username-available', {
+        'username': username,
+      });
+      return response;
+    } catch (e) {
+      print(e);
+    }
+  }
 }

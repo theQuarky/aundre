@@ -1,9 +1,5 @@
-import 'package:audre/login_screen.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/user_api_services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'dart:io' as io;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +24,8 @@ class _CreateProfileState extends State<CreateProfile> {
   final TextEditingController _dobController = TextEditingController();
   DateTime? _dob;
   String? profilePictureUrl;
-  File? _pickedImage = null;
+  File? _pickedImage;
+  bool isUsernameAvailable = true;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -39,6 +36,15 @@ class _CreateProfileState extends State<CreateProfile> {
         _pickedImage = File(pickedImage.path);
       });
     }
+  }
+
+  Future<void> checkuserName(name) async {
+    final result =
+        await UserApiServices.checkUsernameAvailability(username: name);
+
+    setState(() {
+      isUsernameAvailable = (result['message'] != 'Username already exist');
+    });
   }
 
   // upload image to firebase storage
@@ -144,9 +150,15 @@ class _CreateProfileState extends State<CreateProfile> {
                       borderSide: BorderSide.none,
                     ),
                   ),
+                  onChanged: (value) {
+                    checkuserName(value);
+                  },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a username';
+                    }
+                    if (!isUsernameAvailable) {
+                      return 'Username is already taken';
                     }
                     return null;
                   },
@@ -181,6 +193,7 @@ class _CreateProfileState extends State<CreateProfile> {
                     _showDialog(
                       CupertinoDatePicker(
                         mode: CupertinoDatePickerMode.date,
+                        initialDateTime: DateTime.now(),
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() {
                             _dob = newDate;
@@ -206,6 +219,10 @@ class _CreateProfileState extends State<CreateProfile> {
                     if (value == null || value.isEmpty) {
                       return 'Please select a date';
                     }
+                    // age must be greater than 13
+                    if (DateTime.now().difference(_dob!).inDays < 4745) {
+                      return 'You must be at least 13 years old';
+                    }
                     return null;
                   },
                 ),
@@ -230,7 +247,9 @@ class _CreateProfileState extends State<CreateProfile> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // _uploadImage();
+                      if (!kIsWeb) {
+                        _uploadImage();
+                      }
                       UserApiServices.createUserProfile(body: {
                         'username': _usernameController.text,
                         'intro': _introController.text,
@@ -239,6 +258,7 @@ class _CreateProfileState extends State<CreateProfile> {
                         'uid': user!.uid,
                         'dob': _dob.toString().split(' ')[0],
                       });
+                      Navigator.pushReplacementNamed(context, '/home');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -256,15 +276,6 @@ class _CreateProfileState extends State<CreateProfile> {
                     ),
                   ),
                 ),
-                ElevatedButton(
-                    onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()));
-                    },
-                    child: Text('Temp Logout')),
               ],
             ),
           ),

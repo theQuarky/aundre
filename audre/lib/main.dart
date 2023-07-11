@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> navigateToNextPage() async {
     try {
       String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-
+      print(uid);
       if (uid == '') {
         setState(() {
           nextPage = '/login';

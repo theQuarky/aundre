@@ -70,7 +70,10 @@ export const createUser: RequestHandler = async (
   res: IResponse,
   next: NextFunction
 ) => {
-  const { dob, email, username, uid, profile_pic } = _.merge(req.body, req.params);
+  const { dob, email, username, uid, profile_pic } = _.merge(
+    req.body,
+    req.params
+  );
 
   try {
     const user = await UserModal.create({
@@ -78,7 +81,7 @@ export const createUser: RequestHandler = async (
       email,
       username,
       uid,
-      profile_pic
+      profile_pic,
     });
 
     return res.status(200).send({
@@ -195,6 +198,34 @@ export const searchUser: RequestHandler = async (
       user,
     });
   } catch (err) {
+    return res.status(500).send({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const ValidateUsernameAvailable: RequestHandler = async (
+  req: IRequest,
+  res: IResponse,
+  next: NextFunction
+) => {
+  const { username } = _.merge(req.body, req.params);
+  try {
+    const user = await UserModal.findOne({ username });
+    if (user) {
+      return res.status(200).send({
+        success: false,
+        message: "Username already exist",
+      });
+    } else {
+      return res.status(200).send({
+        success: true,
+        message: "Username available",
+      });
+    }
+  } catch (err) {
+    console.log(err);
     return res.status(500).send({
       success: false,
       message: "Internal Server Error",

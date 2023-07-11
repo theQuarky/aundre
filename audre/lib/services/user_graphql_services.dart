@@ -29,7 +29,9 @@ class UserGraphQLService {
       // throw result.exception!;
       return null;
     }
-
+    if (result.data!['getUser'] == null) {
+      return null;
+    }
     return UserModal.fromJson(result.data!['getUser']);
   }
 }

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class RestApiServices {
   // Base URL of your API
-  static const String baseUrl = 'http://localhost:3000/v1';
+  static const String baseUrl = 'https://audre.onrender.com/v1';
 
   // Method to make a GET request
   static Future<dynamic> getRequest(String path) async {

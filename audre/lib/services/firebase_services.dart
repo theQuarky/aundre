@@ -18,7 +18,7 @@ Future<dynamic> createUser(
   try {
     UserCredential userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
-    return userCredential;
+    return userCredential.user;
   } catch (e) {
     String errorMessage = 'An error occurred';
     String code = getErrorCode(e.toString());
@@ -45,7 +45,7 @@ Future<dynamic> createUser(
 
 Future<dynamic> login({required String email, required String password}) async {
   try {
-    final userCredential = await FirebaseAuth.instance
+    UserCredential userCredential = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password);
     return userCredential.user;
   } catch (e) {
