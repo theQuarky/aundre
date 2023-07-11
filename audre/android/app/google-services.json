@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "950599949267",
+    "project_id": "aundre-ceb64",
+    "storage_bucket": "aundre-ceb64.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950599949267:android:d5219a9f97f48b1044ed26",
+        "android_client_info": {
+          "package_name": "com.example.audre"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "950599949267-nvnkipo2ico21g4ccjfekolf6tefmnv2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlFpNJ38LGLLhiAvNwtN55pCSL6o8-CZg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "950599949267-nvnkipo2ico21g4ccjfekolf6tefmnv2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
