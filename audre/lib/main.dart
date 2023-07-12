@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       UserModal? user = await UserGraphQLService.getUser(uid);
-      print(user);
+
       if (user == null) {
         FirebaseUserProvider.setUser(FirebaseAuth.instance.currentUser!);
         setState(() {

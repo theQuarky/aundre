@@ -1,7 +1,8 @@
+import 'package:audre/env.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-final HttpLink httpLink = HttpLink('https://audre.onrender.com/graphql');
+final HttpLink httpLink = HttpLink(graphqlUrl);
 
 final ValueNotifier<GraphQLClient> client = ValueNotifier(
   GraphQLClient(

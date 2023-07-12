@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:audre/models/user_model.dart';
+
 import 'rest_api_services.dart';
 
 class UserApiServices {
@@ -34,6 +38,19 @@ class UserApiServices {
         'username': username,
       });
       return response;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<dynamic> searchUsers({required name}) async {
+    try {
+      final response =
+          await RestApiServices.getRequest('users/search-users/$name');
+      List<UserModal> result = response['users'].map<UserModal>((user) {
+        return UserModal.fromJson(user);
+      }).toList();
+      return result;
     } catch (e) {
       print(e);
     }

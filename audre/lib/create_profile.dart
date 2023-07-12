@@ -1,3 +1,4 @@
+import 'package:audre/models/user_model.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/user_api_services.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -22,6 +23,7 @@ class _CreateProfileState extends State<CreateProfile> {
   final TextEditingController _introController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   DateTime? _dob;
   String? profilePictureUrl;
   File? _pickedImage;
@@ -34,6 +36,21 @@ class _CreateProfileState extends State<CreateProfile> {
     if (pickedImage != null) {
       setState(() {
         _pickedImage = File(pickedImage.path);
+      });
+    }
+  }
+
+  getUser() async {
+    UserModal? user = await UserProvider.getUser();
+    if (user != null) {
+      _usernameController.text = user.username!;
+      _introController.text = user.intro!;
+      _emailController.text = user.email!;
+      _dobController.text = user.dob!;
+      _nameController.text = user.name!;
+      profilePictureUrl = user.profile_pic;
+      setState(() {
+        _dob = DateTime.parse(user.dob!);
       });
     }
   }
@@ -94,6 +111,7 @@ class _CreateProfileState extends State<CreateProfile> {
     setState(() {
       _emailController.text = user!.email!;
     });
+    getUser();
   }
 
   @override
@@ -137,6 +155,21 @@ class _CreateProfileState extends State<CreateProfile> {
                   ),
                 ),
                 const SizedBox(height: 40),
+                TextFormField(
+                  controller: _nameController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Name',
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.grey[900],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  enabled: false,
+                ),
                 TextFormField(
                   controller: _usernameController,
                   style: const TextStyle(color: Colors.white),

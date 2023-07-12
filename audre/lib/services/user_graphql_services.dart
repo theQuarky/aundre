@@ -12,6 +12,7 @@ class UserGraphQLService {
               getUser(uid: \$uid) {
                 uid
                 username
+                name
                 email
                 profile_pic
                 intro
@@ -24,7 +25,7 @@ class UserGraphQLService {
     );
 
     final QueryResult result = await client.value.query(options);
-
+    print(result);
     if (result.hasException) {
       // throw result.exception!;
       return null;

@@ -1,3 +1,4 @@
+import 'package:audre/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:audre/feed_screen.dart';
 import 'package:audre/profile_screen.dart';
@@ -10,7 +11,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List<Widget> items = [const ProfileScreen(), const FeedScreen()];
+  final List<Widget> items = [
+    const ProfileScreen(),
+    const SearchScreen(),
+    const FeedScreen()
+  ];
 
   double currentPage = 0.0;
 
