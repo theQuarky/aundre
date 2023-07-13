@@ -1,6 +1,7 @@
 import 'package:audre/models/user_model.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/user_api_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -16,7 +17,7 @@ class CreateProfile extends StatefulWidget {
 }
 
 class _CreateProfileState extends State<CreateProfile> {
-  final user = FirebaseUserProvider.getUser();
+  User? user = FirebaseUserProvider.getUser();
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
@@ -24,6 +25,14 @@ class _CreateProfileState extends State<CreateProfile> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  String selectedGender = 'Male';
+
+  List<String> genderOptions = [
+    'Male',
+    'Female',
+    'Other',
+  ];
+  bool isUpdate = false;
   DateTime? _dob;
   String? profilePictureUrl;
   File? _pickedImage;
@@ -41,23 +50,30 @@ class _CreateProfileState extends State<CreateProfile> {
   }
 
   getUser() async {
+    User? userData = FirebaseUserProvider.getUser();
     UserModal? user = await UserProvider.getUser();
+
+    print(user?.toLocalString());
+    if (userData != null) {
+      _emailController.text = userData.email!;
+    }
     if (user != null) {
-      _usernameController.text = user.username!;
-      _introController.text = user.intro!;
-      _emailController.text = user.email!;
-      _dobController.text = user.dob!;
-      _nameController.text = user.name!;
-      profilePictureUrl = user.profile_pic;
+      DateTime dob = DateTime.fromMicrosecondsSinceEpoch(int.parse(user.dob!));
       setState(() {
-        _dob = DateTime.parse(user.dob!);
+        isUpdate = true;
+        _nameController.text = user.name!;
+        _usernameController.text = user.username!;
+        _introController.text = user.intro!;
+        profilePictureUrl = user.profile_pic;
+        _dob = DateTime.fromMicrosecondsSinceEpoch(int.parse(user.dob!));
+        _dobController.text = '${dob.year}-${dob.month}-${dob.day}';
       });
     }
   }
 
   Future<void> checkuserName(name) async {
-    final result =
-        await UserApiServices.checkUsernameAvailability(username: name);
+    final result = await UserApiServices.checkUsernameAvailability(
+        username: name, uid: user!.uid);
 
     setState(() {
       isUsernameAvailable = (result['message'] != 'Username already exist');
@@ -108,9 +124,6 @@ class _CreateProfileState extends State<CreateProfile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    setState(() {
-      _emailController.text = user!.email!;
-    });
     getUser();
   }
 
@@ -168,8 +181,14 @@ class _CreateProfileState extends State<CreateProfile> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  enabled: false,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
                 ),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _usernameController,
                   style: const TextStyle(color: Colors.white),
@@ -195,6 +214,39 @@ class _CreateProfileState extends State<CreateProfile> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 20),
+                // Gender Radio Buttons
+                SizedBox(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedGender,
+                    items: genderOptions.map((String gender) {
+                      return DropdownMenuItem<String>(
+                          value: gender,
+                          child: Text(gender,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              )));
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedGender = newValue!;
+                      });
+                    },
+                    dropdownColor: Colors.grey[900],
+                    decoration: InputDecoration(
+                      hintText: 'Gender',
+                      hintStyle: const TextStyle(color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.grey[900],
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -226,7 +278,7 @@ class _CreateProfileState extends State<CreateProfile> {
                     _showDialog(
                       CupertinoDatePicker(
                         mode: CupertinoDatePickerMode.date,
-                        initialDateTime: DateTime.now(),
+                        initialDateTime: _dob,
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() {
                             _dob = newDate;
@@ -284,6 +336,8 @@ class _CreateProfileState extends State<CreateProfile> {
                         _uploadImage();
                       }
                       UserApiServices.createUserProfile(body: {
+                        'name': _nameController.text,
+                        'gender': selectedGender,
                         'username': _usernameController.text,
                         'intro': _introController.text,
                         'email': _emailController.text,
@@ -302,9 +356,9 @@ class _CreateProfileState extends State<CreateProfile> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'Create Profile',
-                    style: TextStyle(
+                  child: Text(
+                    isUpdate ? 'Update Profile' : 'Create Profile',
+                    style: const TextStyle(
                       fontSize: 25,
                     ),
                   ),

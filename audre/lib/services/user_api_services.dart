@@ -31,12 +31,11 @@ class UserApiServices {
     }
   }
 
-  static Future<dynamic> checkUsernameAvailability({required username}) async {
+  static Future<dynamic> checkUsernameAvailability(
+      {required username, required uid}) async {
     try {
-      final response =
-          await RestApiServices.postRequest('users/username-available', {
-        'username': username,
-      });
+      final response = await RestApiServices.postRequest(
+          'users/username-available', {'username': username, 'uid': uid});
       return response;
     } catch (e) {
       print(e);

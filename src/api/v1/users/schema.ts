@@ -4,6 +4,8 @@ export default buildSchema(`
   type User {
     _id: ID
     username: String
+    name: String
+    gender: String
     email: String
     uid: String
     profile_pic: String

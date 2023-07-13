@@ -1,3 +1,5 @@
+import 'package:audre/models/user_model.dart';
+import 'package:audre/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -8,6 +10,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  UserModal? user;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    UserProvider.getUser().then((value) {
+      setState(() {
+        user = value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -86,12 +101,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(50),
-                                        child: Image.network(
-                                          'https://picsum.photos/seed/298/600',
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        child: Image(
+                                            image: NetworkImage(user
+                                                    ?.profile_pic ??
+                                                'https://www.pinclipart.com/picdir/big/148-1486972_mystery-man-avatar-circle-clipart.png'),
+                                            width: 100,
+                                            height: 100,
+                                            fit: BoxFit.cover),
+                                        // child: Image.network(
+                                        //   'https://picsum.photos/seed/298/600',
+                                        //   width: 100,
+                                        //   height: 100,
+                                        //   fit: BoxFit.cover,
+                                        // ),
                                       ),
                                     ),
                                   ),
@@ -104,23 +126,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(
                         width: 20,
                       ),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            'Ghost Writer',
-                            style: TextStyle(
+                            user?.name ?? '',
+                            style: const TextStyle(
                               fontSize: 20,
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
+                          Text(
+                            user?.username != null ? '@${user?.username}' : '',
+                            style: const TextStyle(
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           IntroSection(
-                            introText:
-                                'Lesbian, Feminist, Poet, Activist and Mother, 1934-1992, New York, NY, USA, 58',
+                            introText: user?.intro ?? '',
                           ),
                         ],
                       )
@@ -132,6 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pushNamed('/create-profile');
+                        // Navigator.of(context).push(MaterialPageRoute(builder: (builder)=> const CreateProfile()));
                       },
                       style: ButtonStyle(
                         minimumSize: MaterialStateProperty.all<Size>(
@@ -212,11 +241,16 @@ class _IntroSectionState extends State<IntroSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: MediaQuery.of(context).size.width * 0.4,
+          width: MediaQuery.of(context).size.width * 0.5,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isExpanded ? bioText : '${bioText.substring(0, 40)}...',
+                isExpanded
+                    ? bioText.trim()
+                    : bioText.length > 100
+                        ? '${bioText.trim().substring(0, 100)}...'
+                        : bioText.trim(),
                 style: const TextStyle(
                   fontSize: 15,
                 ),
@@ -224,21 +258,23 @@ class _IntroSectionState extends State<IntroSection> {
             ],
           ),
         ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-          },
-          child: Text(
-            isExpanded ? 'Show less' : 'Show more',
-            style: const TextStyle(
-              color: Colors.blue,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        bioText.trim().length > 100
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isExpanded = !isExpanded;
+                  });
+                },
+                child: Text(
+                  isExpanded ? 'Show less' : 'Show more',
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : const SizedBox(),
       ],
     );
   }

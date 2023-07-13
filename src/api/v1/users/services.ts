@@ -3,15 +3,16 @@ import IRequest from "../IRequest";
 import IResponse from "../IResponse";
 import _ from "lodash";
 import UserModal from "./model";
+import IUser from "./IUser";
 
 export const ValidateUserCreateData: RequestHandler = (
   req: IRequest,
   res: IResponse,
   next: NextFunction
 ) => {
-  const { dob, email, username, uid } = _.merge(req.body, req.params);
+  const { name, dob, email, username, uid } = _.merge(req.body, req.params);
 
-  if (!dob || !email || !username || !uid) {
+  if (!name || !dob || !email || !username || !uid) {
     return res.status(400).send({
       success: false,
       message: "Missing required fields: uid, dob, email",
@@ -26,9 +27,9 @@ export const ValidateUserUpdateData: RequestHandler = (
   res: IResponse,
   next: NextFunction
 ) => {
-  const { email, username, dob } = _.merge(req.body, req.params);
+  const { name, email, username, dob } = _.merge(req.body, req.params);
 
-  if (!email || !username || !dob) {
+  if (!name || !email || !username || !dob) {
     return res.status(400).send({
       success: false,
       message: "Missing required fields: email, username, dob",
@@ -70,19 +71,29 @@ export const createUser: RequestHandler = async (
   res: IResponse,
   next: NextFunction
 ) => {
-  const { dob, email, username, uid, profile_pic } = _.merge(
+  const data = _.merge(
     req.body,
     req.params
   );
+  const userData: Partial<IUser> = {
+    dob: data.dob,
+    email: data.email,
+    username: data.username,
+    name: data.name,
+    uid: data.uid,
+    profile_pic: data.profile_pic,
+    intro: data.intro,
+    gender: data.gender,
+  };
 
   try {
-    const user = await UserModal.create({
-      dob,
-      email,
-      username,
-      uid,
-      profile_pic,
-    });
+    let user:IUser = await UserModal.findOne({ uid: userData.uid });
+
+    if (user) {
+      user = await UserModal.findByIdAndUpdate( user._id, userData);
+    }else{
+      user = await UserModal.create(userData);
+    }
 
     return res.status(200).send({
       success: true,
@@ -90,6 +101,7 @@ export const createUser: RequestHandler = async (
       user,
     });
   } catch (err) {
+    console.log(err);
     return res.status(500).send({
       success: false,
       message: "Internal Server Error",
@@ -102,21 +114,24 @@ export const updateUser: RequestHandler = async (
   res: IResponse,
   next: NextFunction
 ) => {
-  const { name, email, password, username, uid } = _.merge(
+  const data = _.merge(
     req.body,
     req.params
   );
-
+  const userData = {
+    dob: data.dob,
+    email: data.email,
+    username: data.username,
+    name: data.name,
+    uid: data.uid,
+    profile_pic: data.profile_pic,
+    intro: data.intro,
+    gender:data.gender
+  };
   try {
     const user = await UserModal.findByIdAndUpdate(
-      { uid },
-      {
-        name,
-        email,
-        password,
-        username,
-        uid,
-      }
+      { uid: userData.uid },
+      userData
     );
 
     return res.status(200).send({
@@ -210,9 +225,9 @@ export const ValidateUsernameAvailable: RequestHandler = async (
   res: IResponse,
   next: NextFunction
 ) => {
-  const { username } = _.merge(req.body, req.params);
+  const { username, uid } = _.merge(req.body, req.params);
   try {
-    const user = await UserModal.findOne({ username });
+    const user = await UserModal.findOne({ username, uid: { $ne: uid } });
     if (user) {
       return res.status(200).send({
         success: false,
@@ -226,6 +241,30 @@ export const ValidateUsernameAvailable: RequestHandler = async (
     }
   } catch (err) {
     console.log(err);
+    return res.status(500).send({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const searchUsers: RequestHandler = async (
+  req: IRequest,
+  res: IResponse,
+  next: NextFunction
+) => {
+  const { name } = _.merge(req.body, req.params);
+  try {
+    const users = await UserModal.find({
+      username: { $regex: name, $options: "i" },
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "User found successfully",
+      users,
+    });
+  } catch (err) {
     return res.status(500).send({
       success: false,
       message: "Internal Server Error",

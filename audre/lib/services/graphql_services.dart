@@ -7,6 +7,11 @@ final HttpLink httpLink = HttpLink(graphqlUrl);
 final ValueNotifier<GraphQLClient> client = ValueNotifier(
   GraphQLClient(
     cache: GraphQLCache(),
+    defaultPolicies: DefaultPolicies(
+      query: Policies(
+        fetch: FetchPolicy.noCache,
+      ),
+    ),
     link: httpLink,
   ),
 );

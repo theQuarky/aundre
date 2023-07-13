@@ -13,6 +13,8 @@ class UserGraphQLService {
                 uid
                 username
                 name
+                dob
+                gender
                 email
                 profile_pic
                 intro
