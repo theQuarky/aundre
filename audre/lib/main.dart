@@ -2,6 +2,8 @@ import 'package:audre/create_profile.dart';
 import 'package:audre/home.dart';
 import 'package:audre/login_screen.dart';
 import 'package:audre/models/user_model.dart';
+import 'package:audre/other_user_profile_screen.dart';
+import 'package:audre/profile_screen.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/graphql_services.dart';
 import 'package:audre/services/user_graphql_services.dart';
@@ -73,6 +75,12 @@ class MyApp extends StatelessWidget {
           case '/home':
             builder = (BuildContext context) {
               return const Home();
+            };
+            break;
+          case '/profile':
+            builder = (BuildContext context) {
+              String args = settings.arguments as String;
+              return OtherUserProfileScreen(uid: args);
             };
             break;
           case '/create-profile':

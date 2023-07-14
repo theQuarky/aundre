@@ -17,6 +17,10 @@ class UserGraphQLService {
                 gender
                 email
                 profile_pic
+                followers
+                following
+                requests
+                pending_requests
                 intro
                 created_at
                 updated_at
@@ -27,7 +31,6 @@ class UserGraphQLService {
     );
 
     final QueryResult result = await client.value.query(options);
-    print(result);
     if (result.hasException) {
       // throw result.exception!;
       return null;

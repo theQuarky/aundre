@@ -11,6 +11,10 @@ export default buildSchema(`
     profile_pic: String
     dob: String
     intro: String
+    following: [String]
+    followers: [String]
+    requests: [String]
+    pending_requests: [String]
     is_delete: Boolean
     created_at: String
     updated_at: String

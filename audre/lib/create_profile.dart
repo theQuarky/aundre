@@ -37,6 +37,7 @@ class _CreateProfileState extends State<CreateProfile> {
   String? profilePictureUrl;
   File? _pickedImage;
   bool isUsernameAvailable = true;
+  bool isLoading = true;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -65,10 +66,15 @@ class _CreateProfileState extends State<CreateProfile> {
         _usernameController.text = user.username!;
         _introController.text = user.intro!;
         profilePictureUrl = user.profile_pic;
+        selectedGender = user.gender ?? 'Male';
         _dob = DateTime.fromMicrosecondsSinceEpoch(int.parse(user.dob!));
         _dobController.text = '${dob.year}-${dob.month}-${dob.day}';
       });
     }
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> checkuserName(name) async {
@@ -83,17 +89,26 @@ class _CreateProfileState extends State<CreateProfile> {
   // upload image to firebase storage
   Future<void> _uploadImage() async {
     try {
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 1");
       final storage = FirebaseStorage.instance;
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 2");
       final ref = storage
           .ref()
           .child('profile_picture')
           .child('${user!.uid}/picture.png');
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 3");
       await ref.putFile(_pickedImage!);
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 4");
       final url = await ref.getDownloadURL();
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 5");
+      print('URL: $url');
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 6");
       setState(() {
         profilePictureUrl = url;
       });
+      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 7");
     } catch (e) {
+      print("ERROR OCCURED WHILE UPLOADING IMAGE");
       print(e);
     }
   }
@@ -129,8 +144,25 @@ class _CreateProfileState extends State<CreateProfile> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
+      appBar: AppBar(
+        leading: BackButton(
+          color: Colors.white,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       backgroundColor: Colors.black,
       body: Center(
         child: SingleChildScrollView(
@@ -150,13 +182,17 @@ class _CreateProfileState extends State<CreateProfile> {
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: _pickedImage != null
+                      image: profilePictureUrl != null
                           ? DecorationImage(
-                              fit: BoxFit.fill,
-                              image: FileImage(
-                                _pickedImage!,
-                              ))
-                          : null,
+                              image: Image.network(profilePictureUrl!).image,
+                              fit: BoxFit.fill)
+                          : (_pickedImage != null
+                              ? DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: FileImage(
+                                    _pickedImage!,
+                                  ))
+                              : null),
                     ),
                     child: _pickedImage == null
                         ? const Icon(
@@ -267,6 +303,11 @@ class _CreateProfileState extends State<CreateProfile> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an intro';
                     }
+
+                    if (value.length > 120) {
+                      return 'Must be less then 150 character';
+                    }
+
                     return null;
                   },
                 ),
@@ -330,20 +371,27 @@ class _CreateProfileState extends State<CreateProfile> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        isLoading = true;
+                      });
                       if (!kIsWeb) {
-                        _uploadImage();
+                        await _uploadImage();
                       }
+                      print('profilePictureUrl: $profilePictureUrl');
                       UserApiServices.createUserProfile(body: {
                         'name': _nameController.text,
                         'gender': selectedGender,
                         'username': _usernameController.text,
                         'intro': _introController.text,
                         'email': _emailController.text,
-                        'profile_picture': profilePictureUrl,
+                        'profile_pic': profilePictureUrl,
                         'uid': user!.uid,
                         'dob': _dob.toString().split(' ')[0],
+                      });
+                      setState(() {
+                        isLoading = false;
                       });
                       Navigator.pushReplacementNamed(context, '/home');
                     }

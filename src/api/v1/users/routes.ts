@@ -10,5 +10,30 @@ user.post("/register", [
 
 user.post("/username-available", [services.ValidateUsernameAvailable]);
 
-user.get("/search-users/:name", [services.searchUsers]);
+user.post("/search-users/:name", [services.searchUsers]);
+
+user.post("/follow-user", [
+  services.followUserExists,
+  services.getUserType,
+  services.followPublicUser,
+  services.followPrivateUser
+]);
+
+user.post("/unfollow-user", [
+  services.unfollowUser
+]);
+
+user.post("/cancel-follow-request", [
+  services.cancelFollowRequest
+]);
+
+user.post("/accept-follow-request", [
+  services.acceptFollowRequest
+]);
+
+user.post("/reject-follow-request", [
+  services.rejectFollowRequest
+]);
+
+
 export default user;

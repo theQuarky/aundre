@@ -1,32 +1,87 @@
 import 'package:audre/models/user_model.dart';
 import 'package:audre/providers/user_provider.dart';
+import 'package:audre/services/user_api_services.dart';
+import 'package:audre/services/user_graphql_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class OtherUserProfileScreen extends StatefulWidget {
+  final String uid;
+  const OtherUserProfileScreen({super.key, required this.uid});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<OtherUserProfileScreen> createState() => _OtherUserProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  UserModal? user;
+class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
+  UserModal? user, currentUser;
+
+  Future<void> followUnfollowUser() async {
+    if (getRelationshipStatus() == 'Following') {
+      UserApiServices.unfollowUser(uid: currentUser?.uid, unfollowId: user?.uid)
+          .then((value) {
+        loadUser();
+      });
+    } else if (getRelationshipStatus() == 'Requested') {
+      UserApiServices.cancelFollowRequest(
+              uid: currentUser?.uid, cancelId: user?.uid)
+          .then((value) {
+        loadUser();
+      });
+    } else {
+      UserApiServices.followUser(uid: currentUser?.uid, followId: user?.uid)
+          .then((value) {
+        loadUser();
+      });
+    }
+  }
+
+  Future<void> loadUser() async {
+    UserGraphQLService.getUser(widget.uid).then((value) {
+      setState(() {
+        user = value;
+      });
+    });
+    UserProvider.getUser().then((value) {
+      print('USER: ${value?.toLocalString()}');
+      setState(() {
+        currentUser = value;
+      });
+    });
+  }
+
+  String getRelationshipStatus() {
+    print('''
+      currentUser pending_requests:  $currentUser
+      user UID: ${user?.uid}
+    ''');
+
+    if (currentUser!.pending_requests!.contains(user!.uid)) {
+      return "Requested";
+    }
+    if (currentUser!.following!.contains(user!.uid)) {
+      return "Following";
+    }
+    return "Follow";
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    UserProvider.getUser().then((value) {
-      setState(() {
-        user = value;
-      });
-    });
+    loadUser();
   }
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.height;
+    if (user == null && currentUser == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0),
@@ -71,8 +126,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: const Icon(Icons.logout)),
                 ],
               ),
+              currentUser!.requests!.contains(user!.uid)
+                  ? Container(
+                      height: 25,
+                      width: 200,
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(50),
+                          bottomRight: Radius.circular(50),
+                          topLeft: Radius.circular(0),
+                          topRight: Radius.circular(0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.black,
+                              ),
+                              onPressed: () {
+                                UserApiServices.acceptFollowRequest(
+                                        uid: currentUser?.uid,
+                                        acceptId: user?.uid)
+                                    .then((value) {
+                                  loadUser();
+                                });
+                              },
+                              child: const Text(
+                                'Accept',
+                                style: TextStyle(color: Colors.white),
+                              )),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.black,
+                              ),
+                              onPressed: () {
+                                UserApiServices.rejectFollowRequest(
+                                        uid: currentUser?.uid,
+                                        rejectId: user?.uid)
+                                    .then((value) {
+                                  loadUser();
+                                });
+                              },
+                              child: const Text(
+                                'Decline',
+                                style: TextStyle(color: Colors.white),
+                              )),
+                        ],
+                      ),
+                    )
+                  : const SizedBox(),
               const SizedBox(
-                height: 50,
+                height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -170,8 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/create-profile');
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (builder)=> const CreateProfile()));
+                    followUnfollowUser();
                   },
                   style: ButtonStyle(
                     minimumSize:
@@ -184,9 +294,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  child: const Text(
-                    'Edit Profile',
-                    style: TextStyle(
+                  child: Text(
+                    getRelationshipStatus(),
+                    style: const TextStyle(
                       fontSize: 20,
                     ),
                   )),
@@ -288,4 +398,10 @@ class _IntroSectionState extends State<IntroSection> {
       ],
     );
   }
+}
+
+class OtherUserProfileScreenArguments {
+  final String uid;
+
+  OtherUserProfileScreenArguments(this.uid);
 }

@@ -1,4 +1,6 @@
 import 'package:audre/models/user_model.dart';
+import 'package:audre/other_user_profile_screen.dart';
+import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/user_api_services.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +16,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final List<UserModal> users = [];
   Future<void> searchUsers(String name) async {
     try {
-      List<UserModal> users = await UserApiServices.searchUsers(name: name);
+      List<UserModal> users = await UserApiServices.searchUsers(
+          name: name, uid: FirebaseUserProvider.getUser()!.uid);
 
       setState(() {
         this.users.clear();
@@ -59,18 +62,24 @@ class _SearchScreenState extends State<SearchScreen> {
                 itemCount: users.length,
                 itemBuilder: (BuildContext context, int index) {
                   UserModal user = users[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(user.profile_pic ??
-                            'https://robohash.org/${user.username}}'),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile',
+                          arguments: user.uid);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      subtitle: Text(user.username ?? ''),
-                      // title: Text(user.name),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(user.profile_pic ??
+                              'https://robohash.org/${user.username}}'),
+                        ),
+                        title: Text(user.name ?? ''),
+                        subtitle: Text(user.username ?? ''),
+                        // title: Text(user.name),
+                      ),
                     ),
                   );
                 },

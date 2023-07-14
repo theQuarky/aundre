@@ -9,6 +9,23 @@ const UserSchema: Schema<IUser> = new Schema(
     uid: { type: String, required: true, indexes: true, unique: true },
     dob: { type: Date , required: true},
     gender: { type: String, enum: ['Male','Female','Other'], default: null },
+    following: {
+      type: [String],
+      default: [], 
+    },
+    followers: {
+      type: [String],
+      default: [],
+    },
+    requests: {
+      type: [String],
+      default: [],
+    },
+    pending_requests: {
+      type: [String],
+      default: [],
+    },
+    is_private: { type: Boolean, default: true },
     profile_pic: { type: String },
     intro: { type: String },
     is_delete: { type: Boolean, default: false },

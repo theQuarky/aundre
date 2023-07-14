@@ -7,7 +7,13 @@ class UserModal {
   final String? profile_pic;
   final String? name;
   final String? dob;
+  final String? gender;
   final String? intro;
+  final List<String?>? followers;
+  final List<String?>? following;
+  final List<String?>? requests;
+  final List<String?>? pending_requests;
+  final bool? is_private;
   final String? created_at;
   final String? updated_at;
 
@@ -19,6 +25,12 @@ class UserModal {
     this.name,
     this.dob,
     this.intro,
+    this.gender,
+    this.followers,
+    this.following,
+    this.requests,
+    this.pending_requests,
+    this.is_private,
     this.created_at,
     this.updated_at,
   });
@@ -30,6 +42,13 @@ class UserModal {
       uid: json['uid'],
       profile_pic: json['profile_pic'],
       intro: json['intro'],
+      gender: json['gender'],
+      followers: json['followers'].map<String>((e) => e.toString()).toList(),
+      following: json['following'].map<String>((e) => e.toString()).toList(),
+      requests: json['requests'].map<String>((e) => e.toString()).toList(),
+      pending_requests:
+          json['pending_requests'].map<String>((e) => e.toString()).toList(),
+      is_private: json['is_private'],
       created_at: json['created_at'],
       updated_at: json['updated_at'],
       name: json['name'],
@@ -38,6 +57,20 @@ class UserModal {
   }
 
   String toLocalString() {
-    return 'UserModal(username: $username, email: $email, uid: $uid, profile_pic: $profile_pic, name: $name, dob: $dob, intro: $intro, created_at: $created_at, updated_at: $updated_at)';
+    return '''
+          UserModal(username: $username, 
+                    email: $email, 
+                    uid: $uid, 
+                    profile_pic: $profile_pic, 
+                    name: $name, 
+                    dob: $dob, 
+                    intro: $intro, 
+                    followers: $followers, 
+                    following: $following, 
+                    requests: $requests, 
+                    pending_requests: $pending_requests 
+                    created_at: $created_at, 
+                    updated_at: $updated_at)
+          ''';
   }
 }

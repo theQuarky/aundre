@@ -9,6 +9,11 @@ export default interface IUser extends Document {
   profile_pic?: string;
   dob: Date;
   intro?: string;
+  following?: string[];
+  followers?: string[];
+  requests?: string[];
+  pending_requests?: string[];
+  is_private?: boolean;
   is_delete?: boolean;
   created_at: Date;
   updated_at: Date;
