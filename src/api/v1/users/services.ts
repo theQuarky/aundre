@@ -87,7 +87,7 @@ export const createUser: RequestHandler = async (
     let user: IUser = await UserModal.findOne({ uid: userData.uid });
 
     if (user) {
-      user = await UserModal.findOneAndUpdate(user._id, userData);
+      user = await UserModal.findOneAndUpdate({ uid: user.uid }, userData);
     } else {
       user = await UserModal.create(userData);
     }
@@ -585,6 +585,33 @@ export const cancelFollowRequest: RequestHandler = async (
   } catch (err) {
     console.log(err);
 
+    return res.status(500).send({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const addNote: RequestHandler = async (
+  req: IRequest,
+  res: IResponse,
+  next: NextFunction
+) => {
+  try {
+    const note = req.note;
+    const user = req.user;
+
+    await UserModal.findOneAndUpdate(
+      { uid: user.uid },
+      {
+        $addToSet: {
+          notes: note.note_id,
+        },
+      }
+    );
+    return next();
+  } catch (error) {
+    console.log(error);
     return res.status(500).send({
       success: false,
       message: "Internal Server Error",

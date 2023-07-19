@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:audre/models/user_model.dart';
 
 import 'rest_api_services.dart';

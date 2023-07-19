@@ -26,186 +26,162 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery.of(context).size.height;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Scaffold(
-
-          // backgroundColor: Colors.white,
-          body: SingleChildScrollView(
-        child: Container(
-          // height: MediaQuery.of(context).size.height * 0.915,
-          height: MediaQuery.of(context).size.height * 0.97,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  BackButton(
+    return Column(
+      children: [
+        const SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            BackButton(
+              color: Colors.black,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            const Text('Profile',
+                style: TextStyle(
                     color: Colors.black,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  const Text('Profile',
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold)),
-                  IconButton(
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/login', (Route<dynamic> route) => false);
-                      },
-                      icon: const Icon(Icons.logout)),
-                ],
-              ),
-              const SizedBox(
-                height: 50,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold)),
+            IconButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login', (Route<dynamic> route) => false);
+                },
+                icon: const Icon(Icons.logout)),
+          ],
+        ),
+        const SizedBox(
+          height: 50,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 200,
+              height: 150,
+              child: Stack(
                 children: [
-                  SizedBox(
-                    width: 200,
-                    height: 150,
-                    child: Stack(
-                      children: [
-                        Align(
-                          alignment: const AlignmentDirectional(-1, 0),
+                  Align(
+                    alignment: const AlignmentDirectional(-1, 0),
+                    child: Container(
+                      width: 250,
+                      height: 150,
+                      decoration: const BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(0),
+                          bottomRight: Radius.circular(100),
+                          topLeft: Radius.circular(0),
+                          topRight: Radius.circular(100),
+                        ),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Align(
+                        alignment: const AlignmentDirectional(1, 0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
                           child: Container(
-                            width: 250,
-                            height: 150,
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(0),
-                                bottomRight: Radius.circular(100),
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(100),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                width: 2,
                               ),
-                              shape: BoxShape.rectangle,
+                              borderRadius: BorderRadius.circular(50),
                             ),
-                            child: Align(
-                              alignment: const AlignmentDirectional(1, 0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color.fromARGB(
-                                          255, 255, 255, 255),
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: Image(
-                                        image: NetworkImage(user?.profile_pic ??
-                                            'https://www.pinclipart.com/picdir/big/148-1486972_mystery-man-avatar-circle-clipart.png'),
-                                        width: 100,
-                                        height: 100,
-                                        fit: BoxFit.cover),
-                                    // child: Image.network(
-                                    //   user?.profile_pic ??
-                                    //       'https://www.pinclipart.com/picdir/big/148-1486972_mystery-man-avatar-circle-clipart.png',
-                                    //   width: 100,
-                                    //   height: 100,
-                                    //   fit: BoxFit.cover,
-                                    // ),
-                                  ),
-                                ),
-                              ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Image(
+                                  image: NetworkImage(user?.profile_pic ??
+                                      'https://www.pinclipart.com/picdir/big/148-1486972_mystery-man-avatar-circle-clipart.png'),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover),
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.name ?? '',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                      Text(
-                        user?.username != null ? '@${user?.username}' : '',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      IntroSection(
-                        introText: user?.intro ?? '',
-                      ),
-                    ],
-                  )
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/create-profile');
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (builder)=> const CreateProfile()));
-                  },
-                  style: ButtonStyle(
-                    minimumSize:
-                        MaterialStateProperty.all<Size>(const Size(4, 40)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 0, 0, 0)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                    ),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  user?.name ?? '',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.normal,
                   ),
-                  child: const Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  )),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildFFL(title: 'Notes', subtitle: '40'),
-                  _buildFFL(title: 'Following', subtitle: '1.2k'),
-                  _buildFFL(title: 'Followers', subtitle: '1.2k'),
-                ],
-              )
-            ],
-          ),
+                ),
+                Text(
+                  user?.username != null ? '@${user?.username}' : '',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                IntroSection(
+                  introText: user?.intro ?? '',
+                ),
+              ],
+            )
+          ],
         ),
-      )),
+        const SizedBox(
+          height: 20,
+        ),
+        ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed('/create-profile');
+              // Navigator.of(context).push(MaterialPageRoute(builder: (builder)=> const CreateProfile()));
+            },
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all<Size>(const Size(4, 40)),
+              backgroundColor: MaterialStateProperty.all<Color>(
+                  const Color.fromARGB(255, 0, 0, 0)),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+              ),
+            ),
+            child: const Text(
+              'Edit Profile',
+              style: TextStyle(
+                fontSize: 20,
+              ),
+            )),
+        const SizedBox(
+          height: 20,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildFFL(title: 'Notes', subtitle: '40'),
+            _buildFFL(
+                title: 'Following',
+                subtitle: user?.following?.length.toString() ?? '0'),
+            _buildFFL(
+                title: 'Followers',
+                subtitle: user?.followers?.length.toString() ?? '0'),
+          ],
+        )
+      ],
     );
   }
 }

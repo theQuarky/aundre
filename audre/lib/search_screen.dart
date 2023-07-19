@@ -30,63 +30,60 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            TextFormField(
-              controller: _searchController,
-              onChanged: (value) {
-                if (value.length > 3) {
-                  searchUsers(value);
-                }
-              },
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: const TextStyle(color: Colors.white70),
-                filled: true,
-                fillColor: Colors.grey[900],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          TextFormField(
+            controller: _searchController,
+            onChanged: (value) {
+              if (value.length > 3) {
+                searchUsers(value);
+              }
+            },
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: 'Search',
+              hintStyle: const TextStyle(color: Colors.white70),
+              filled: true,
+              fillColor: Colors.grey[900],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (BuildContext context, int index) {
-                  UserModal user = users[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/profile',
-                          arguments: user.uid);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user.profile_pic ??
-                              'https://robohash.org/${user.username}}'),
-                        ),
-                        title: Text(user.name ?? ''),
-                        subtitle: Text(user.username ?? ''),
-                        // title: Text(user.name),
-                      ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (BuildContext context, int index) {
+                UserModal user = users[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/profile',
+                        arguments: user.uid);
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  );
-                },
-              ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(user.profile_pic ??
+                            'https://robohash.org/${user.username}}'),
+                      ),
+                      title: Text(user.name ?? ''),
+                      subtitle: Text(user.username ?? ''),
+                      // title: Text(user.name),
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

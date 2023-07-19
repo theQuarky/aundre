@@ -229,13 +229,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                         width: 100,
                                         height: 100,
                                         fit: BoxFit.cover),
-                                    // child: Image.network(
-                                    //   user?.profile_pic ??
-                                    //       'https://www.pinclipart.com/picdir/big/148-1486972_mystery-man-avatar-circle-clipart.png',
-                                    //   width: 100,
-                                    //   height: 100,
-                                    //   fit: BoxFit.cover,
-                                    // ),
                                   ),
                                 ),
                               ),
@@ -308,8 +301,12 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _buildFFL(title: 'Notes', subtitle: '40'),
-                  _buildFFL(title: 'Following', subtitle: '1.2k'),
-                  _buildFFL(title: 'Followers', subtitle: '1.2k'),
+                  _buildFFL(
+                      title: 'Following',
+                      subtitle: user?.following?.length.toString() ?? '0'),
+                  _buildFFL(
+                      title: 'Followers',
+                      subtitle: user?.followers?.length.toString() ?? '0'),
                 ],
               )
             ],

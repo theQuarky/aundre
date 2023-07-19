@@ -44,7 +44,9 @@ dependencies:
   image_picker: ^1.0.0
   flutter_riverpod: ^2.3.6
   firebase_storage: ^11.2.4
-  
+  audio_waveforms: ^1.0.4
+  file_picker: ^5.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

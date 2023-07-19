@@ -6,16 +6,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
-    "build": "tsc"
+    "build": "tsc",
+    "clean": "rm -rf dist && mkdir dist && rm -rf node_modules"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@graphql-tools/merge": "^9.0.0",
+    "@graphql-tools/schema": "^10.0.0",
     "apollo-server": "^3.12.0",
     "apollo-server-express": "^3.12.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-graphql": "^0.12.0",
+    "graphql": "^16.7.1",
     "graphql-tools": "^9.0.0",
     "http-status": "^1.6.2",
     "jwt-then": "^1.0.1",

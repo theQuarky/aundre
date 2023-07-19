@@ -3,6 +3,7 @@ import 'package:audre/home.dart';
 import 'package:audre/login_screen.dart';
 import 'package:audre/models/user_model.dart';
 import 'package:audre/other_user_profile_screen.dart';
+import 'package:audre/post_screen.dart';
 import 'package:audre/profile_screen.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/graphql_services.dart';
@@ -88,6 +89,11 @@ class MyApp extends StatelessWidget {
               return const CreateProfile();
             };
             break;
+          case '/create-post':
+            builder = (BuildContext context) {
+              return const PostScreen();
+            };
+            break;
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
@@ -152,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(nextPage);
+    // return const PostScreen();
     switch (nextPage) {
       case '/login':
         return const LoginScreen();

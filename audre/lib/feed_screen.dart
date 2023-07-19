@@ -10,8 +10,15 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Feed Screen'),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: [
+            Text('Feed'),
+            ElevatedButton(onPressed: null, child: Text('Post'))
+          ],
+        ),
+      ),
     );
   }
 }

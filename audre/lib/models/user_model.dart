@@ -13,6 +13,7 @@ class UserModal {
   final List<String?>? following;
   final List<String?>? requests;
   final List<String?>? pending_requests;
+  final List<String?>? notes;
   final bool? is_private;
   final String? created_at;
   final String? updated_at;
@@ -30,6 +31,7 @@ class UserModal {
     this.following,
     this.requests,
     this.pending_requests,
+    this.notes,
     this.is_private,
     this.created_at,
     this.updated_at,
@@ -49,6 +51,7 @@ class UserModal {
       pending_requests:
           json['pending_requests'].map<String>((e) => e.toString()).toList(),
       is_private: json['is_private'],
+      notes: json['notes'].map<String>((e) => e.toString()).toList(),
       created_at: json['created_at'],
       updated_at: json['updated_at'],
       name: json['name'],
@@ -69,6 +72,7 @@ class UserModal {
                     following: $following, 
                     requests: $requests, 
                     pending_requests: $pending_requests 
+                    notes: $notes,
                     created_at: $created_at, 
                     updated_at: $updated_at)
           ''';

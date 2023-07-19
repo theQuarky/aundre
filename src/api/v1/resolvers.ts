@@ -1,6 +1,6 @@
 // combine resolves from all modules
-import { merge } from "lodash";
+import { mergeResolvers } from "@graphql-tools/merge";
 import userResolvers from "./users/resolver";
+import noteResolvers from "./notes/resolver";
 
-const resolvers = merge({...userResolvers});
-export default resolvers;
+export default mergeResolvers([userResolvers, noteResolvers]);

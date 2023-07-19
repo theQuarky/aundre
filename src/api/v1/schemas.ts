@@ -1,7 +1,9 @@
 // combine all schemas from all modules
-
-import { merge } from "lodash";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { mergeTypeDefs } from "@graphql-tools/merge";
 import userSchema from "./users/schema";
+import noteSchema from "./notes/schema";
 
-const schemas = merge(userSchema);
-export default schemas;
+export default makeExecutableSchema({
+  typeDefs: mergeTypeDefs([userSchema, noteSchema]),
+});

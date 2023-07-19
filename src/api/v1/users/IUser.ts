@@ -13,6 +13,7 @@ export default interface IUser extends Document {
   followers?: string[];
   requests?: string[];
   pending_requests?: string[];
+  notes?: string[];
   is_private?: boolean;
   is_delete?: boolean;
   created_at: Date;

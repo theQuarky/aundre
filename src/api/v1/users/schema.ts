@@ -15,6 +15,7 @@ export default buildSchema(`
     followers: [String]
     requests: [String]
     pending_requests: [String]
+    notes: [String]
     is_delete: Boolean
     created_at: String
     updated_at: String
