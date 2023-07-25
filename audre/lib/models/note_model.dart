@@ -3,8 +3,11 @@ class NoteModel {
   final String mediaUrl;
   final String caption;
   final List<String> tags;
-  final List<String> interactions;
-  final List<CommentModel> comments;
+  final List<dynamic> interactions;
+  final List<String> comments;
+  final int likeCount;
+  final int dislikeCount;
+  final int commentCount;
   final bool isPrivate;
   final String createdBy;
   final bool isDelete;
@@ -23,26 +26,54 @@ class NoteModel {
     required this.isDelete,
     required this.createdAt,
     required this.updatedAt,
+    this.likeCount = 0,
+    this.dislikeCount = 0,
+    this.commentCount = 0,
   });
 
   factory NoteModel.fromJson(Map<String, dynamic> json) {
+    print(json['interactions']);
     return NoteModel(
       noteId: json['note_id'],
-      mediaUrl: json['media_url'],
-      caption: json['caption'],
-      tags: json['tags'].map<String>((e) => TagModel.fromJson(e)).toList(),
+      mediaUrl: json['media_url'] ?? '',
+      caption: json['caption'] ?? '',
+      tags: [],
       interactions: json['interactions']
-          .map<String>((e) => InteractionModel.fromJson(e))
+          .map<dynamic>((e) => InteractionModel.fromJson(e))
           .toList(),
-      comments: json['comments']
-          .map<dynamic>((e) => CommentModel.fromJson(e))
-          .toList(),
-      isPrivate: json['is_private'],
-      createdBy: json['created_by'],
-      isDelete: json['is_delete'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      comments: [],
+      isPrivate: json['is_private'] ?? false,
+      createdBy: json['created_by'] ?? '',
+      isDelete: json['is_delete'] ?? false,
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+      likeCount: json['like_count'] ?? 0,
+      dislikeCount: json['dislike_count'] ?? 0,
+      commentCount: json['comment_count'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'note_id': noteId,
+      'media_url': mediaUrl,
+      'caption': caption,
+      'tags': tags,
+      'interactions': interactions,
+      'comments': comments,
+      'is_private': isPrivate,
+      'created_by': createdBy,
+      'is_delete': isDelete,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'like_count': likeCount,
+      'dislike_count': dislikeCount,
+      'comment_count': commentCount,
+    };
+  }
+
+  void toLocalString() {
+    print(toJson());
   }
 }
 
@@ -51,18 +82,14 @@ class InteractionModel {
   final String noteId;
   final String userId;
   final String type;
-  final bool isDelete;
   final String createdAt;
-  final String updatedAt;
 
   InteractionModel({
     required this.interactionId,
     required this.noteId,
     required this.userId,
     required this.type,
-    required this.isDelete,
     required this.createdAt,
-    required this.updatedAt,
   });
 
   factory InteractionModel.fromJson(Map<String, dynamic> json) {
@@ -71,10 +98,22 @@ class InteractionModel {
       noteId: json['note_id'],
       userId: json['user_id'],
       type: json['type'],
-      isDelete: json['is_delete'],
       createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'interaction_id': interactionId,
+      'note_id': noteId,
+      'user_id': userId,
+      'type': type,
+      'created_at': createdAt,
+    };
+  }
+
+  void toLocalString() {
+    print(toJson());
   }
 }
 
@@ -108,6 +147,22 @@ class CommentModel {
       updatedAt: json['updated_at'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'comment_id': commentId,
+      'note_id': noteId,
+      'user_id': userId,
+      'comment': comment,
+      'is_delete': isDelete,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
+  }
+
+  void toLocalString() {
+    print(toJson());
+  }
 }
 
 class TagModel {
@@ -127,5 +182,17 @@ class TagModel {
       tag: json['tag'],
       noteId: json['note_id'].map<String>((e) => e.toString()).toList(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tag_id': tagId,
+      'tag': tag,
+      'note_id': noteId,
+    };
+  }
+
+  void toLocalString() {
+    print(toJson());
   }
 }

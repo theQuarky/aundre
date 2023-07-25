@@ -21,9 +21,11 @@ class UserProvider {
     state = user;
   }
 
-  static Future<UserModal?> getUser() async {
+  static UserModal? getUser() {
     String uid = FirebaseUserProvider.getUser()!.uid;
-    final user = await UserGraphQLService.getUser(uid);
-    return user;
+    UserGraphQLService.getUser(uid).then((value) {
+      state = value;
+    });
+    return state;
   }
 }

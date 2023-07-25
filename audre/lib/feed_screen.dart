@@ -10,7 +10,8 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(0, 255, 255, 255),
       body: Center(
         child: Column(
           children: [

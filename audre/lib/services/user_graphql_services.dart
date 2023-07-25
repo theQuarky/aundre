@@ -21,6 +21,7 @@ class UserGraphQLService {
                 following
                 requests
                 pending_requests
+                notes
                 intro
                 created_at
                 updated_at
@@ -31,6 +32,7 @@ class UserGraphQLService {
     );
 
     final QueryResult result = await client.value.query(options);
+
     if (result.hasException) {
       // throw result.exception!;
       return null;

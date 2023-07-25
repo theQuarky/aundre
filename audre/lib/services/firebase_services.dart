@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
 String getErrorCode(String message) {
@@ -72,5 +75,24 @@ Future<dynamic> login({required String email, required String password}) async {
       }
       throw Exception(errorMessage);
     }
+  }
+}
+
+Future<String> uploadAudioFileToFirebaseStorage(
+    {required String filePath}) async {
+  try {
+    File file = File(filePath);
+    String fileName = filePath;
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child('users')
+        .child('audio')
+        .child(fileName);
+    UploadTask uploadTask = ref.putFile(file);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    return await taskSnapshot.ref.getDownloadURL();
+  } catch (e) {
+    print(e);
+    throw Exception('An error occurred');
   }
 }

@@ -46,6 +46,8 @@ dependencies:
   firebase_storage: ^11.2.4
   audio_waveforms: ^1.0.4
   file_picker: ^5.3.2
+  audioplayers: any
+  just_audio: ^0.9.34
 
 dev_dependencies:
   flutter_test:

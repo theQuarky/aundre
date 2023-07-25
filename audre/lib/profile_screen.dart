@@ -1,3 +1,4 @@
+import 'package:audre/components/noteview_widget.dart';
 import 'package:audre/models/user_model.dart';
 import 'package:audre/providers/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,15 +13,14 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   UserModal? user;
+  double currentPage = 0.0;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    UserProvider.getUser().then((value) {
-      setState(() {
-        user = value;
-      });
+    setState(() {
+      user = UserProvider.getUser();
     });
   }
 
@@ -71,9 +71,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Container(
                       width: 250,
                       height: 150,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: Colors.black,
-                        borderRadius: BorderRadius.only(
+                        border: Border.all(color: Colors.transparent),
+                        borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(0),
                           bottomRight: Radius.circular(100),
                           topLeft: Radius.circular(0),
@@ -172,7 +173,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildFFL(title: 'Notes', subtitle: '40'),
+            _buildFFL(
+                title: 'Notes',
+                subtitle: user?.notes?.length.toString() ?? '0'),
             _buildFFL(
                 title: 'Following',
                 subtitle: user?.following?.length.toString() ?? '0'),
@@ -180,7 +183,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: 'Followers',
                 subtitle: user?.followers?.length.toString() ?? '0'),
           ],
-        )
+        ),
+        const Divider(
+          color: Colors.black,
+          thickness: 1,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: PageView.builder(
+            physics: const ClampingScrollPhysics(),
+            onPageChanged: (int index) {
+              setState(() {
+                currentPage = index.toDouble();
+              });
+            },
+            scrollDirection: Axis.vertical,
+            itemCount: user?.notes?.length ?? 0,
+            itemBuilder: (BuildContext context, int index) {
+              return NoteView(
+                noteId: user?.notes?[index] ?? '',
+              );
+            },
+          ),
+        ),
       ],
     );
   }

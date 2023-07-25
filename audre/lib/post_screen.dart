@@ -1,46 +1,45 @@
-import 'dart:io';
-
 import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:audre/models/user_model.dart';
+import 'package:audre/providers/user_provider.dart';
+import 'package:audre/services/note_api_services.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 class PostScreen extends StatefulWidget {
-  const PostScreen({super.key});
+  final String audioUrl;
+  final String audioPath;
+  const PostScreen(
+      {super.key, required this.audioUrl, required this.audioPath});
 
   @override
   State<PostScreen> createState() => _PostScreenState();
 }
 
 class _PostScreenState extends State<PostScreen> {
-  late final RecorderController recorderController;
-  String? path;
-  String? musicFile;
-  bool isPlaying = false;
-  bool isRecording = false;
-  bool isRecordingCompleted = false;
-  bool isLoading = true;
-  late Directory appDirectory;
-  bool showRecordedWave = false;
   late PlayerController playerController;
+  final TextEditingController captionController = TextEditingController();
+  UserModal? user;
+  bool isPlaying = false;
 
-  void _getDir() async {
-    appDirectory = await getApplicationDocumentsDirectory();
-    path = "${appDirectory.path}/${DateTime.now().millisecondsSinceEpoch}.wav";
-    isLoading = false;
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      user = UserProvider.getUser();
+    });
+    _initialiseControllers();
   }
 
   void _initialiseControllers() {
     playerController = PlayerController();
-    recorderController = RecorderController()
-      ..androidEncoder = AndroidEncoder.aac
-      ..androidOutputFormat = AndroidOutputFormat.mpeg4
-      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-      ..sampleRate = 44100
-      ..bitRate = 128000
-      ..updateFrequency = const Duration(milliseconds: 50);
 
+    playerController.preparePlayer(
+      path: widget.audioPath,
+      shouldExtractWaveform: true,
+      noOfSamples: 100,
+      volume: 1.0,
+    );
+    playerController.updateFrequency = UpdateFrequency.low;
+    playerController.startPlayer();
     playerController.addListener(() {
       final state = playerController.playerState;
 
@@ -75,191 +74,145 @@ class _PostScreenState extends State<PostScreen> {
     });
   }
 
-  void showPlayer() async {
-    isRecordingCompleted = true;
-    debugPrint(path);
-    debugPrint("Recorded file size: ${File(musicFile!).lengthSync()}");
-    await playerController.preparePlayer(
-      path: musicFile!,
-      shouldExtractWaveform: true,
-      noOfSamples: 100,
-      volume: 1.0,
-    );
-    playerController.updateFrequency = UpdateFrequency.low;
-    playerController.addListener(_refreshWave);
-    setState(() {
-      showRecordedWave = true;
-    });
-  }
-
-  void _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['mp3', 'wav'],
-    );
-    if (result != null) {
-      musicFile = result.files.single.path;
-      setState(() {
-        path = musicFile;
-      });
-    } else {
-      debugPrint("File not picked");
-    }
-  }
-
-  void _startOrStopRecording() async {
-    try {
-      if (isRecording) {
-        recorderController.reset();
-        final path = await recorderController.stop(false);
-
-        if (path != null) {
-          isRecordingCompleted = true;
-          debugPrint(path);
-          debugPrint("Recorded file size: ${File(path).lengthSync()}");
-          await playerController.preparePlayer(
-            path: path,
-            shouldExtractWaveform: true,
-            noOfSamples: 100,
-            volume: 1.0,
-          );
-          playerController.updateFrequency = UpdateFrequency.low;
-          playerController.addListener(_refreshWave);
-          setState(() {
-            showRecordedWave = true;
-          });
-        }
-      } else {
-        await recorderController.record(path: path!);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    } finally {
-      setState(() {
-        isRecording = !isRecording;
-      });
-    }
-  }
-
-  void _refreshWave() {
-    if (isRecording) recorderController.refresh();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getDir();
-    _initialiseControllers();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.purple, Colors.blue])),
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                    color: Colors.black),
-                child: Center(
-                    child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        _startOrStopRecording();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: const CircleBorder(),
-                        padding: const EdgeInsets.all(20),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple,
+            Colors.deepPurple,
+            Colors.blue,
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
+          children: [
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 30,
+                    )),
+                const Text('New Post',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ))
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AudioFileWaveforms(
+                        size: Size(
+                            MediaQuery.of(context).size.width / 1.5, 100.0),
+                        playerController: playerController,
+                        enableSeekGesture: true,
+                        waveformType: WaveformType.long,
+                        continuousWaveform: true,
+                        playerWaveStyle: const PlayerWaveStyle(
+                          fixedWaveColor: Colors.white,
+                          liveWaveColor: Colors.blueAccent,
+                          spacing: 6,
+                        ),
+                        // progressWaveStyle: const ProgressWaveStyle(
+                        //   progressColor: Colors.white.withOpacity(0.8),
+                        //   progressWidth: 2.0,
+                        // ),
                       ),
-                      child: Icon(isRecording ? Icons.stop : Icons.play_arrow,
-                          size: 50),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (isPlaying) {
+                            await playerController.pausePlayer();
+                          } else {
+                            await playerController.startPlayer();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black,
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(16),
+                          elevation: 5,
+                        ),
+                        child: Icon(
+                          isPlaying ? Icons.pause : Icons.play_arrow,
+                          size: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: captionController,
+                    decoration: InputDecoration(
+                      hintText: 'Caption...',
+                      hintStyle:
+                          const TextStyle(color: Color.fromARGB(179, 0, 0, 0)),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 255, 255, 255),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
-                  ],
-                )),
-              ),
-              const SizedBox(height: 20),
-              isRecording
-                  ? AudioWaveforms(
-                      enableGesture: true,
-                      size: Size(MediaQuery.of(context).size.width / 2, 50),
-                      recorderController: recorderController,
-                      waveStyle: const WaveStyle(
-                        waveColor: Colors.white,
-                        extendWaveform: true,
-                        showMiddleLine: false,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.0),
-                        color: const Color(0xFF1E1B26),
-                      ),
-                      padding: const EdgeInsets.only(left: 18),
-                      margin: const EdgeInsets.symmetric(horizontal: 15),
-                    )
-                  : const SizedBox(),
-              const SizedBox(height: 20),
-              showRecordedWave
-                  ? Column(
-                      children: [
-                        AudioFileWaveforms(
-                          size: Size(MediaQuery.of(context).size.width, 100.0),
-                          playerController: playerController,
-                          enableSeekGesture: true,
-                          waveformType: WaveformType.long,
-                          continuousWaveform: true,
-                          playerWaveStyle: const PlayerWaveStyle(
-                            fixedWaveColor: Colors.white54,
-                            liveWaveColor: Colors.blueAccent,
-                            spacing: 6,
+                    style: const TextStyle(
+                        color: Color.fromARGB(255, 31, 31, 31), fontSize: 18),
+                    cursorColor: const Color.fromARGB(255, 0, 0, 0),
+                    textAlign: TextAlign.start,
+                    maxLines: 4,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          NoteApiServices.createNote(
+                                  mediaUrl: widget.audioUrl,
+                                  createdBy: user!.uid,
+                                  caption: captionController.text)
+                              .then((value) {
+                            print(value);
+                            Navigator.of(context).popAndPushNamed('/home');
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
+                          padding: const EdgeInsets.all(16),
+                          elevation: 5,
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () async {
-                                if (isPlaying) {
-                                  await playerController.pausePlayer();
-                                } else {
-                                  await playerController.startPlayer();
-                                }
-                              },
-                              child: Icon(
-                                  isPlaying ? Icons.pause : Icons.play_arrow),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                showRecordedWave = false;
-                              });
-                              _initialiseControllers();
-                            },
-                            child: const Text("Discard"))
-                      ],
-                    )
-                  : const SizedBox(),
-              IconButton(
-                  onPressed: showRecordedWave ? () {} : null,
-                  icon: const Icon(
-                    Icons.arrow_circle_right_outlined,
-                    color: Colors.white,
-                    size: 50,
-                  ))
-            ],
-          ),
+                        child: const Text('Post'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

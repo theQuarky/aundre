@@ -14,9 +14,9 @@ class _HomeState extends State<Home> {
   bool _isDragging = false;
   PageController? _pageController;
   final List<Widget> items = [
+    const ProfileScreen(),
     const FeedScreen(),
     const SearchScreen(),
-    const ProfileScreen(),
   ];
 
   double currentPage = 0.0;
@@ -40,100 +40,37 @@ class _HomeState extends State<Home> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).popAndPushNamed('/create-post');
+          Navigator.of(context).pushNamed('/record-post');
         },
         backgroundColor: Colors.black,
         child: const Icon(Icons.add),
       ),
-      body: GestureDetector(
-        onHorizontalDragStart: (_) => _onPageStartDrag(),
-        onHorizontalDragEnd: (_) => _onPageEndDrag(),
-        child: Stack(
-          children: [
-            Center(
-              child: PageView.builder(
-                physics: !_isDragging
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
-                itemCount: items.length,
-                onPageChanged: (int index) {
-                  setState(() {
-                    currentPage = index.toDouble();
-                  });
-                },
-                controller: _pageController,
-                itemBuilder: (BuildContext context, int index) {
-                  // final padding = (100.0 * scale + (100.0 / height));
-                  return Center(
-                    child: AnimatedContainer(
-                      width: MediaQuery.of(context).size.width * 1.5,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: currentPage != index ? 0 : 30),
-                      duration: const Duration(milliseconds: 300),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16.0),
-                      ),
-                      child: Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Scaffold(
-                            // backgroundColor: Colors.white,
-                            body: SingleChildScrollView(
-                              child: Container(
-                                // height: MediaQuery.of(context).size.height * 0.915,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.97,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: items[index],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      body: PageView.builder(
+        physics: !_isDragging
+            ? const AlwaysScrollableScrollPhysics()
+            : const NeverScrollableScrollPhysics(),
+        itemCount: items.length,
+        onPageChanged: (int index) {
+          setState(() {
+            currentPage = index.toDouble();
+          });
+        },
+        controller: _pageController,
+        itemBuilder: (BuildContext context, int index) {
+          // final padding = (100.0 * scale + (100.0 / height));
+          return Container(
+              decoration: const BoxDecoration(
+                color: Colors.black,
               ),
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
+              padding: EdgeInsets.all(currentPage != index ? 0 : 10),
+              child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
                     color: Colors.white,
                   ),
-                  onPressed: () {
-                    _pageController?.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeIn);
-                  },
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    _pageController?.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeIn);
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
+                  child: items[index]));
+        },
       ),
     );
   }

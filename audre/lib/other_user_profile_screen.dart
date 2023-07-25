@@ -42,11 +42,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         user = value;
       });
     });
-    UserProvider.getUser().then((value) {
-      print('USER: ${value?.toLocalString()}');
-      setState(() {
-        currentUser = value;
-      });
+    setState(() {
+      currentUser = UserProvider.getUser();
     });
   }
 

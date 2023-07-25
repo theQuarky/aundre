@@ -1,15 +1,17 @@
-import { buildSchema } from "graphql";
-
-export default buildSchema(`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const graphql_1 = require("graphql");
+exports.default = (0, graphql_1.buildSchema)(`
     type Note {
       note_id: String!
       media_url: String!
       caption: String!
       tags: [String!]!
-      interactions: [Interaction!]!
+      interactions: [String!]!
       like_count: Int
       dislike_count: Int
       comment_count: Int
+      comments: [Comment!]
       is_private: Boolean
       is_delete: Boolean
       created_at: String
@@ -42,24 +44,7 @@ export default buildSchema(`
       note_id: [String!]
     }
 
-    type User {
-      username: String!
-      uid: String!
-      profile_pic: String
-    }
-
-    type NoteComments {
-      comment_id: String!
-      note_id: String!
-      user_id: String!
-      comment: String!
-      created_at: String
-      updated_at: String
-      user: User
-    }
-
     type Query {
       getNoteById(note_id: String!): Note
-      getNoteComments(note_id: String!): [NoteComments]
-    }  
+    }
 `);

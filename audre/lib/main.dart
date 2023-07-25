@@ -3,6 +3,7 @@ import 'package:audre/home.dart';
 import 'package:audre/login_screen.dart';
 import 'package:audre/models/user_model.dart';
 import 'package:audre/other_user_profile_screen.dart';
+import 'package:audre/post_record_screen.dart';
 import 'package:audre/post_screen.dart';
 import 'package:audre/profile_screen.dart';
 import 'package:audre/providers/user_provider.dart';
@@ -89,9 +90,19 @@ class MyApp extends StatelessWidget {
               return const CreateProfile();
             };
             break;
+          case '/record-post':
+            builder = (BuildContext context) {
+              return const PostRecordScreen();
+            };
+            break;
           case '/create-post':
             builder = (BuildContext context) {
-              return const PostScreen();
+              Map<String, String> args =
+                  settings.arguments as Map<String, String>;
+              return PostScreen(
+                audioUrl: args['audioUrl'] ?? '',
+                audioPath: args['audioPath'] ?? '',
+              );
             };
             break;
           default:
@@ -158,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // return const PostScreen();
+    // return const PostScreen(audioPath: '', audioUrl: '');
     switch (nextPage) {
       case '/login':
         return const LoginScreen();
