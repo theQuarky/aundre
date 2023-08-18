@@ -1,4 +1,6 @@
 import 'package:audre/search_screen.dart';
+import 'package:audre/services/socket_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audre/feed_screen.dart';
 import 'package:audre/profile_screen.dart';
@@ -14,9 +16,9 @@ class _HomeState extends State<Home> {
   bool _isDragging = false;
   PageController? _pageController;
   final List<Widget> items = [
-    const ProfileScreen(),
     const FeedScreen(),
     const SearchScreen(),
+    const ProfileScreen(),
   ];
 
   double currentPage = 0.0;
@@ -34,9 +36,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    SocketService.connectToServer(
+        userId: FirebaseAuth.instance.currentUser!.uid);
     return Scaffold(
       backgroundColor: Colors.black,
       extendBody: false,
+      resizeToAvoidBottomInset: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {

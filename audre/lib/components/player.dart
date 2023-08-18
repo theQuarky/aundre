@@ -33,8 +33,6 @@ class _PlayerState extends State<Player> {
       }
     });
     audioSession.interruptionEventStream.listen((event) {
-      print('interruption begin: ${event.begin}');
-      print('interruption type: ${event.type}');
       if (event.begin) {
         switch (event.type) {
           case AudioInterruptionType.duck:

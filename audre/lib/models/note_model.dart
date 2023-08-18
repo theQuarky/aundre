@@ -32,7 +32,6 @@ class NoteModel {
   });
 
   factory NoteModel.fromJson(Map<String, dynamic> json) {
-    print(json['interactions']);
     return NoteModel(
       noteId: json['note_id'],
       mediaUrl: json['media_url'] ?? '',

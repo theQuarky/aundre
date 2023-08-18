@@ -1,9 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/firebase_services.dart';
 import 'package:audre/splash.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -102,13 +100,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (isLogin) {
                       try {
-                        User? user = await login(
+                        await login(
                             email: _emailController.text,
                             password: _passwordController.text);
                         setState(() {
                           isLoading = false;
                         });
-                        FirebaseUserProvider.setUser(user);
                         Navigator.pushNamed(context, '/');
                       } catch (e) {
                         setState(() {
@@ -123,10 +120,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                     } else {
                       try {
-                        User? user = await createUser(
+                        await createUser(
                             email: _emailController.text,
                             password: _passwordController.text);
-                        FirebaseUserProvider.setUser(user);
                         Navigator.pushNamed(context, '/create-profile');
                       } catch (e) {
                         setState(() {
@@ -149,12 +145,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Container(
-                    child: Text(
-                      isLogin ? 'Login' : 'Sign up',
-                      style: const TextStyle(
-                        fontSize: 25,
-                      ),
+                  child: Text(
+                    isLogin ? 'Login' : 'Sign up',
+                    style: const TextStyle(
+                      fontSize: 25,
                     ),
                   ),
                 ),

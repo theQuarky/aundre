@@ -2,14 +2,17 @@ import * as bodyParser from "body-parser";
 import cors from "cors";
 import * as express from "express";
 import morgan from "morgan";
+import socketIO from "socket.io";
+import http from "http";
 import apiV1 from "./api/v1/index";
 import * as errorHandler from "./helpers/errorHandler";
 import mongoose from "mongoose";
 import config from "./config/config";
 import { graphqlHTTP } from "express-graphql"; // ES6
-import { makeExecutableSchema } from 'graphql-tools';
+import { makeExecutableSchema } from "graphql-tools";
 import schemas from "./api/v1/schemas";
 import resolvers from "./api/v1/resolvers";
+import { socketService } from "./api/v1/socketService";
 
 class App {
   public express: express.Application;
@@ -75,8 +78,12 @@ class App {
     this.express.use(errorHandler.internalServerError);
   }
 
-  public startServer(port: number): void {
-    this.express.listen(port, () => {
+  public startServers(port: number): void {
+    const server = http.createServer(this.express);
+    const io = new socketIO.Server(server);
+    io.of("/socket").on("connection", (socket) => socketService(socket, io));
+
+    server.listen(port, () => {
       console.log(`Server started on port ${port}`);
     });
   }

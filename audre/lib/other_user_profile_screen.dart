@@ -48,15 +48,15 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
   }
 
   String getRelationshipStatus() {
-    print('''
-      currentUser pending_requests:  $currentUser
-      user UID: ${user?.uid}
-    ''');
+    final followings = currentUser!.following;
+    final pending = currentUser!.pending_requests;
 
-    if (currentUser!.pending_requests!.contains(user!.uid)) {
+    if (followings == null || pending == null) return "Follow";
+
+    if (pending.contains(user!.uid)) {
       return "Requested";
     }
-    if (currentUser!.following!.contains(user!.uid)) {
+    if (followings.contains(user!.uid)) {
       return "Following";
     }
     return "Follow";
@@ -71,14 +71,14 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (user == null && currentUser == null) {
+    if (user == null || currentUser == null) {
+      // Return a loading indicator or any placeholder widget
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0),
@@ -116,69 +116,66 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                           fontWeight: FontWeight.bold)),
                   IconButton(
                       onPressed: () {
-                        FirebaseAuth.instance.signOut();
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/login', (Route<dynamic> route) => false);
+                        // FirebaseAuth.instance.signOut();
+                        // Navigator.of(context).pushNamedAndRemoveUntil(
+                        //     '/login', (Route<dynamic> route) => false);
                       },
-                      icon: const Icon(Icons.logout)),
+                      icon: const Icon(Icons.settings)),
                 ],
               ),
-              currentUser!.requests!.contains(user!.uid)
-                  ? Container(
-                      height: 25,
-                      width: 200,
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(50),
-                          bottomRight: Radius.circular(50),
-                          topLeft: Radius.circular(0),
-                          topRight: Radius.circular(0),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.black,
-                              ),
-                              onPressed: () {
-                                UserApiServices.acceptFollowRequest(
-                                        uid: currentUser?.uid,
-                                        acceptId: user?.uid)
-                                    .then((value) {
-                                  loadUser();
-                                });
-                              },
-                              child: const Text(
-                                'Accept',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                          const SizedBox(
-                            width: 10,
+              if (currentUser!.requests!.contains(user!.uid))
+                Container(
+                  height: 25,
+                  width: 200,
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 0, 0, 0),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(50),
+                      bottomRight: Radius.circular(50),
+                      topLeft: Radius.circular(0),
+                      topRight: Radius.circular(0),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
                           ),
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.black,
-                              ),
-                              onPressed: () {
-                                UserApiServices.rejectFollowRequest(
-                                        uid: currentUser?.uid,
-                                        rejectId: user?.uid)
-                                    .then((value) {
-                                  loadUser();
-                                });
-                              },
-                              child: const Text(
-                                'Decline',
-                                style: TextStyle(color: Colors.white),
-                              )),
-                        ],
+                          onPressed: () {
+                            UserApiServices.acceptFollowRequest(
+                                    uid: currentUser?.uid, acceptId: user?.uid)
+                                .then((value) {
+                              loadUser();
+                            });
+                          },
+                          child: const Text(
+                            'Accept',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                      const SizedBox(
+                        width: 10,
                       ),
-                    )
-                  : const SizedBox(),
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                          onPressed: () {
+                            UserApiServices.rejectFollowRequest(
+                                    uid: currentUser?.uid, rejectId: user?.uid)
+                                .then((value) {
+                              loadUser();
+                            });
+                          },
+                          child: const Text(
+                            'Decline',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ],
+                  ),
+                ),
               const SizedBox(
                 height: 10,
               ),
@@ -269,27 +266,57 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               const SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
-                  onPressed: () {
-                    followUnfollowUser();
-                  },
-                  style: ButtonStyle(
-                    minimumSize:
-                        MaterialStateProperty.all<Size>(const Size(4, 40)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 0, 0, 0)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        followUnfollowUser();
+                      },
+                      style: ButtonStyle(
+                        minimumSize:
+                            MaterialStateProperty.all<Size>(const Size(4, 40)),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            const Color.fromARGB(255, 0, 0, 0)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  child: Text(
-                    getRelationshipStatus(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                    ),
-                  )),
+                      child: Text(
+                        getRelationshipStatus(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
+                      )),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/chat',
+                            arguments: {'userId': user!.uid});
+                      },
+                      style: ButtonStyle(
+                        minimumSize:
+                            MaterialStateProperty.all<Size>(const Size(4, 40)),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            const Color.fromARGB(255, 0, 0, 0)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Message',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      )),
+                ],
+              ),
               const SizedBox(
                 height: 20,
               ),

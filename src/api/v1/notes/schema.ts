@@ -61,5 +61,6 @@ export default buildSchema(`
     type Query {
       getNoteById(note_id: String!): Note
       getNoteComments(note_id: String!): [NoteComments]
+      getFeed(uid: String!, page: Int) : [Note]
     }  
 `);

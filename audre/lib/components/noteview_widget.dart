@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:audre/components/player.dart';
 import 'package:audre/models/note_model.dart';
 import 'package:audre/providers/user_provider.dart';
@@ -25,7 +26,6 @@ class _NoteViewState extends State<NoteView> {
     // TODO: implement initState
     super.initState();
     NoteGraphQLService.getNote(noteId: widget.noteId).then((value) {
-      print('object: $value');
       setState(() {
         note = value;
         loading = false;
@@ -62,6 +62,9 @@ class _NoteViewState extends State<NoteView> {
         noteId: noteId,
         userId: UserProvider.getUser()!.uid ?? '',
         isLiked: likeStatus);
+    setState(() {
+      isLiked = likeStatus;
+    });
 
     NoteModel? tempNote = await NoteGraphQLService.getNote(
       noteId: widget.noteId,
@@ -104,127 +107,114 @@ class _NoteViewState extends State<NoteView> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-              color: Colors.black,
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+        // return CommentView(comments: comments, noteId: note!.noteId);
+        String noteId = note!.noteId;
+        String profilePic = UserProvider.getUser()?.profile_pic ?? '';
+        return isCommentLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Scaffold(
+                appBar: AppBar(
+                    title: const Text('Post Comments'),
+                    leading: BackButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                    )),
+                body: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height - 150,
+                        child: ListView.builder(
+                          itemCount: comments.length,
+                          itemBuilder: (context, index) {
+                            return CommentBubble(
+                              comment: comments[index],
+                            );
                           },
-                          icon: const Icon(Icons.close_rounded,
-                              color: Colors.white)),
-                      const Text('Comments',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                      IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.send_rounded,
-                              color: Colors.transparent)),
-                    ],
-                  ),
-                  const Divider(color: Colors.white, thickness: 2),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: 1,
                         ),
-                        ...comments
-                            .map((e) => CommentBubble(
-                                  comment: e,
-                                ))
-                            .toList()
-                      ],
-                    ),
-                  ), // Add your comment list UI here,
-                  const Divider(color: Colors.white, thickness: 2),
-                  isCommentLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(width: 10),
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.white,
-                              child: CircleAvatar(
-                                radius: 18,
-                                backgroundImage: NetworkImage(
-                                    UserProvider.getUser()?.profile_pic ?? ''),
+                      ),
+                      SizedBox(
+                        height: 50.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(width: 10),
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.white,
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundImage: NetworkImage(profilePic),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                    minHeight: 40,
-                                    maxHeight:
-                                        120), // Set a minimum and maximum height for the comment box
-                                child: SingleChildScrollView(
-                                  child: TextFormField(
-                                    controller: _commentController,
-                                    cursorColor: Colors.white,
-                                    style: const TextStyle(color: Colors.white),
-                                    maxLines:
-                                        null, // Allow the TextField to have unlimited lines (expand vertically)
-                                    decoration: const InputDecoration(
-                                      hintText: 'Add a comment...',
-                                      hintStyle: TextStyle(color: Colors.white),
-                                      border: InputBorder.none,
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                      minHeight: 40,
+                                      maxHeight:
+                                          120), // Set a minimum and maximum height for the comment box
+                                  child: SingleChildScrollView(
+                                    child: TextFormField(
+                                      controller: _commentController,
+                                      cursorColor: Colors.white,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                      maxLines:
+                                          null, // Allow the TextField to have unlimited lines (expand vertically)
+                                      decoration: const InputDecoration(
+                                        hintText: 'Add a comment...',
+                                        hintStyle:
+                                            TextStyle(color: Colors.white),
+                                        border: InputBorder.none,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isCommentLoading = true;
-                                });
-                                NoteApiServices.addComment(
-                                        noteId: note!.noteId,
-                                        userId: UserProvider.getUser()!.uid,
-                                        comment: _commentController.text)
-                                    .then((value) {
-                                  NoteGraphQLService.getComments(
-                                          noteId: note!.noteId)
-                                      .then((value) {
-                                    setState(() {
-                                      comments = value;
-                                    });
-                                    setState(() {
-                                      isCommentLoading = false;
-                                    });
-                                    _commentController.clear();
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    isCommentLoading = true;
                                   });
-                                });
-                              },
-                              icon: const Icon(Icons.send_rounded,
-                                  color: Colors.white),
-                            ),
-                          ],
+                                  comments.add({
+                                    'user': {
+                                      'username':
+                                          UserProvider.getUser()!.username,
+                                      'profile_pic':
+                                          UserProvider.getUser()!.profile_pic
+                                    },
+                                    'comment': _commentController.text
+                                  });
+                                  NoteApiServices.addComment(
+                                          noteId: noteId,
+                                          userId: UserProvider.getUser()!.uid,
+                                          comment: _commentController.text)
+                                      .then((value) {
+                                    NoteGraphQLService.getComments(
+                                            noteId: noteId)
+                                        .then((value) {
+                                      setState(() {
+                                        comments = value;
+                                      });
+                                      _commentController.clear();
+                                      Navigator.of(context).pop();
+                                    });
+                                  });
+                                },
+                                icon: const Icon(Icons.send_rounded,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
-                ],
-              )),
-        );
+                      ),
+                    ],
+                  ),
+                ),
+              );
       },
     );
   }
@@ -324,9 +314,9 @@ class CommentBubble extends StatefulWidget {
 class _CommentBubbleState extends State<CommentBubble> {
   @override
   Widget build(BuildContext context) {
-    print(widget.comment);
     final comment = widget.comment;
     final user = comment['user'];
+    print(comment['created_at']);
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -352,8 +342,22 @@ class _CommentBubbleState extends State<CommentBubble> {
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, color: Colors.white)),
                   const SizedBox(height: 5),
-                  Text(comment['comment'],
-                      style: const TextStyle(color: Colors.white)),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width - 100,
+                    child: Text(comment['comment'],
+                        style: const TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Text(
+                        readTimestamp(comment[
+                            'created_at']), // Replace with the timestamp of the comment.
+                        style: const TextStyle(
+                            color: Color.fromARGB(255, 255, 255, 255)),
+                      ),
+                    ],
+                  )
                 ],
               )
             ],
@@ -362,4 +366,27 @@ class _CommentBubbleState extends State<CommentBubble> {
       ],
     );
   }
+}
+
+String readTimestamp(String timestamp) {
+  var now = DateTime.now();
+  var format = DateFormat('HH:mm a');
+  var date = DateTime.fromMicrosecondsSinceEpoch(int.parse(timestamp) * 1000);
+  var diff = date.difference(now);
+  var time = '';
+
+  if (diff.inSeconds <= 0 ||
+      diff.inSeconds > 0 && diff.inMinutes == 0 ||
+      diff.inMinutes > 0 && diff.inHours == 0 ||
+      diff.inHours > 0 && diff.inDays == 0) {
+    time = format.format(date);
+  } else {
+    if (diff.inDays == 1) {
+      time = '${diff.inDays}DAY AGO';
+    } else {
+      time = '${diff.inDays}DAYS AGO';
+    }
+  }
+
+  return time;
 }

@@ -19,10 +19,8 @@ class UserApiServices {
 
   static Future<dynamic> createUserProfile({dynamic body}) async {
     try {
-      print(body);
       final response =
           await RestApiServices.postRequest('users/register', body);
-      print(response);
       return response;
     } catch (e) {
       print(e);

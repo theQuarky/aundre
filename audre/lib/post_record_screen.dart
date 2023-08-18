@@ -78,8 +78,6 @@ class _PostRecordScreenState extends State<PostRecordScreen> {
 
   void showPlayer() async {
     isRecordingCompleted = true;
-    debugPrint(path);
-    debugPrint("Recorded file size: ${File(musicFile!).lengthSync()}");
     await playerController.preparePlayer(
       path: musicFile!,
       shouldExtractWaveform: true,
@@ -116,7 +114,6 @@ class _PostRecordScreenState extends State<PostRecordScreen> {
 
         if (path != null) {
           isRecordingCompleted = true;
-          debugPrint(path);
           debugPrint("Recorded file size: ${File(path).lengthSync()}");
           await playerController.preparePlayer(
             path: path,
@@ -173,9 +170,6 @@ class _PostRecordScreenState extends State<PostRecordScreen> {
                       'audioUrl': value,
                       'audioPath': path!,
                     };
-
-                    print(args.runtimeType);
-
                     Navigator.of(context)
                         .pushNamed('/create-post', arguments: args);
                   } else {

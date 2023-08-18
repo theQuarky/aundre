@@ -56,7 +56,8 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: ListView.separated(
+              separatorBuilder: (context, index) => const Divider(),
               itemCount: users.length,
               itemBuilder: (BuildContext context, int index) {
                 UserModal user = users[index];

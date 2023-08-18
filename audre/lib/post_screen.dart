@@ -193,7 +193,6 @@ class _PostScreenState extends State<PostScreen> {
                                   createdBy: user!.uid,
                                   caption: captionController.text)
                               .then((value) {
-                            print(value);
                             Navigator.of(context).popAndPushNamed('/home');
                           });
                         },

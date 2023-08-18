@@ -1,19 +1,19 @@
+import 'package:audre/chat_list_screen.dart';
 import 'package:audre/create_profile.dart';
 import 'package:audre/home.dart';
 import 'package:audre/login_screen.dart';
+import 'package:audre/chat_screen.dart';
 import 'package:audre/models/user_model.dart';
 import 'package:audre/other_user_profile_screen.dart';
 import 'package:audre/post_record_screen.dart';
 import 'package:audre/post_screen.dart';
-import 'package:audre/profile_screen.dart';
-import 'package:audre/providers/user_provider.dart';
 import 'package:audre/services/graphql_services.dart';
 import 'package:audre/services/user_graphql_services.dart';
-// import 'package:audre/services/user_graphql_services.dart';
 import 'package:audre/splash.dart';
+import 'package:audre/stores/locator.dart';
+import 'package:audre/stores/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,7 +30,7 @@ void main() async {
         data: TextSelectionThemeData(
           cursorColor: Colors.white, // Set the cursor color here
         ),
-        child: ProviderScope(child: MyApp()),
+        child: MyApp(),
       )));
 }
 
@@ -105,6 +105,20 @@ class MyApp extends StatelessWidget {
               );
             };
             break;
+          case '/chat':
+            builder = (BuildContext context) {
+              Map<String, String?> args =
+                  settings.arguments as Map<String, String?>;
+              return ChatScreen(
+                partnerId: args['userId'] ?? '',
+              );
+            };
+            break;
+          case '/chat-list':
+            builder = (BuildContext context) {
+              return const ChatList();
+            };
+            break;
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
@@ -120,6 +134,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+UserStore userStore = UserStore();
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -134,7 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> navigateToNextPage() async {
     try {
       String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
-      print(uid);
       if (uid == '') {
         setState(() {
           nextPage = '/login';
@@ -143,14 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       UserModal? user = await UserGraphQLService.getUser(uid);
+      locator.setup();
 
       if (user == null) {
-        FirebaseUserProvider.setUser(FirebaseAuth.instance.currentUser!);
         setState(() {
           nextPage = '/create-profile';
         });
       } else {
-        UserProvider.setUser(user);
+        userStore.setUser(user);
         setState(() {
           nextPage = '/home';
         });

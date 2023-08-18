@@ -8,6 +8,7 @@ export default interface IUser extends Document {
   gender?: string;
   profile_pic?: string;
   dob: Date;
+  chats?: string[];
   intro?: string;
   following?: string[];
   followers?: string[];

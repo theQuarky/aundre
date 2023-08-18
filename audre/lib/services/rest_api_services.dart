@@ -31,7 +31,6 @@ class RestApiServices {
       final data = jsonDecode(response.body);
       return data;
     } else {
-      print(response.body);
       throw Exception('Failed to make POST request: ${response.statusCode}');
     }
   }

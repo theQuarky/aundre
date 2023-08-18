@@ -78,4 +78,32 @@ class NoteGraphQLService {
     }
     return result.data!['getNoteComments'];
   }
+
+  static Future<List<String>?> getFeedData(
+      {required String userId, required int page}) async {
+    final QueryOptions options = QueryOptions(
+      document: gql('''
+            query getFeed(\$uid: String!, \$page: Int!) {
+              getFeed(uid: \$uid, page: \$page) {
+                  note_id
+              }
+            }
+        '''),
+      variables: {'uid': userId, 'page': page},
+    );
+
+    final QueryResult result = await client.value.query(options);
+    if (result.hasException) {
+      print('Called: ${result.exception}');
+      // throw result.exception!;
+      return null;
+    }
+    if (result.data!['getFeed'] == null) {
+      return null;
+    }
+    List list = result.data!['getFeed'] as List;
+    list = list.map((e) => e['note_id'] as String).toList();
+
+    return list as List<String>;
+  }
 }

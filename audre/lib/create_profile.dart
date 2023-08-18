@@ -54,7 +54,6 @@ class _CreateProfileState extends State<CreateProfile> {
     User? userData = FirebaseUserProvider.getUser();
     UserModal? user = await UserProvider.getUser();
 
-    print(user?.toLocalString());
     if (userData != null) {
       _emailController.text = userData.email!;
     }
@@ -89,26 +88,18 @@ class _CreateProfileState extends State<CreateProfile> {
   // upload image to firebase storage
   Future<void> _uploadImage() async {
     try {
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 1");
       final storage = FirebaseStorage.instance;
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 2");
       final ref = storage
           .ref()
           .child('profile_picture')
           .child('${user!.uid}/picture.png');
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 3");
       await ref.putFile(_pickedImage!);
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 4");
       final url = await ref.getDownloadURL();
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 5");
       print('URL: $url');
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 6");
       setState(() {
         profilePictureUrl = url;
       });
-      print("DEBUGGING UPLOADING IMAGE: CHECKPOINT 7");
     } catch (e) {
-      print("ERROR OCCURED WHILE UPLOADING IMAGE");
       print(e);
     }
   }
@@ -379,7 +370,6 @@ class _CreateProfileState extends State<CreateProfile> {
                       if (!kIsWeb) {
                         await _uploadImage();
                       }
-                      print('profilePictureUrl: $profilePictureUrl');
                       UserApiServices.createUserProfile(body: {
                         'name': _nameController.text,
                         'gender': selectedGender,

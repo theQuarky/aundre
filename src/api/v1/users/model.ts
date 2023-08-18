@@ -8,6 +8,10 @@ const UserSchema: Schema<IUser> = new Schema(
     email: { type: String, required: true, unique: true, indexes: true },
     uid: { type: String, required: true, indexes: true, unique: true },
     dob: { type: Date , required: true},
+    chats: {
+      type: [String],
+      default: [],
+    },
     gender: { type: String, enum: ['Male','Female','Other'], default: null },
     notes: {
       type: [String],
