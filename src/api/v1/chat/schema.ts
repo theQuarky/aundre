@@ -8,13 +8,20 @@ export default buildSchema(`
     profile_pic: String!
   }
 
+  type SEEN_BY {
+    uid: String
+    seenAt: String
+  }
+
   type Message {
     message_id: String!
     chat_id: String!
     sender_id: String!
     partner_id: String!
     message: String!
+    media: String
     sender: User!
+    seenBy: [SEEN_BY!]
     created_at: String!
   }
 
@@ -28,6 +35,7 @@ export default buildSchema(`
     chat_id: String!
     partner_id: String!
     partner: Partner!
+    media: String
     last_message: String!
     last_message_time: String!
   }

@@ -11,14 +11,16 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
+  bool hydrated = false;
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
         final chats = locator.messageStore.chats;
         locator.messageStore.hydrateMessages();
-        if (chats.isEmpty) {
+        if (chats.isEmpty && !hydrated) {
           locator.messageStore.hydrateChats();
+          hydrated = true;
         }
         return Scaffold(
             // backgroundColor: Colors.white,

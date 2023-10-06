@@ -22,7 +22,8 @@ const MessageSchema: Schema<any> = new Schema(
     },
     message: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
     },
     is_delete: {
       type: Boolean,
@@ -32,6 +33,11 @@ const MessageSchema: Schema<any> = new Schema(
     media: {
       type: String,
       required: false,
+    },
+    seenBy: {
+      type: Array,
+      required: false,
+      default: [],
     },
   },
   {

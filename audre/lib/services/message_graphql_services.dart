@@ -15,10 +15,15 @@ class MessagesGraphQLService {
                 sender_id
                 partner_id
                 message
+                media
                 sender{
                   uid
                   username
                   profile_pic
+                }
+                seenBy {
+                  uid
+                  seenAt
                 }
                 created_at
               }
@@ -49,6 +54,7 @@ class MessagesGraphQLService {
                   username
                   profile_pic
                 }
+                media
                 last_message
                 last_message_time
               }
@@ -70,6 +76,7 @@ class MessagesGraphQLService {
         'partner': e['partner'],
         'last_message': e['last_message'],
         'last_message_time': e['last_message_time'],
+        'media': e['media'],
       };
     }).toList();
   }

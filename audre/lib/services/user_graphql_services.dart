@@ -6,7 +6,6 @@ class UserGraphQLService {
   UserGraphQLService();
 
   static Future<UserModal?> getUser(String uid) async {
-    print('GRAPHQL SERVICE CALLED');
     try {
       final QueryOptions options = QueryOptions(
         document: gql('''

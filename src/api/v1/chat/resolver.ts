@@ -52,6 +52,8 @@ const chatResolver = {
               message: 1,
               created_at: 1,
               updated_at: 1,
+              media: 1,
+              seenBy: 1,
               "sender.uid": 1,
               "sender.username": 1,
               "sender.profile_pic": 1,
@@ -62,17 +64,31 @@ const chatResolver = {
           },
         ];
 
-        const messages = await MessageModel.aggregate(aggregationPipeline);
-
-        return messages.map((message: any) => ({
+        const messages = (await MessageModel.aggregate(aggregationPipeline)).map((message: any) => ({
           message_id: message.message_id,
           chat_id: message.chat_id,
           sender_id: message.sender.uid,
           partner_id: message.receiver.uid,
           message: message.message,
+          media: message.media,
+          seenBy: message.seenBy,
           sender: message.sender,
           created_at: message.created_at,
         }));
+
+        // const _messages = messages.map((message: any) => ({
+        //   message_id: message.message_id,
+        //   chat_id: message.chat_id,
+        //   sender_id: message.sender.uid,
+        //   partner_id: message.receiver.uid,
+        //   message: message.message,
+        //   media: message.media,
+        //   seenBy: message.seenBy,
+        //   sender: message.sender,
+        //   created_at: message.created_at,
+        // }))
+
+        return messages;
       } catch (err) {
         console.log(err);
       }
@@ -107,7 +123,7 @@ const chatResolver = {
           return acc;
         }, {});
 
-        console.log(lastMessages);
+        // console.log(lastMessages);
         // const latestMessagesByChatAndUser = messages.reduce((acc, message) => {
         //   if (!acc[message.chat_id]) {
         //     acc[message.chat_id] = {};
@@ -155,6 +171,7 @@ const chatResolver = {
           chat_id: chat.chat_id,
           partner_id: chat.partner.uid,
           partner: chat.partner,
+          media: chat.media,
           last_message: chat.last_message,
           last_message_time: Math.floor(
             new Date(chat.last_message_time).getTime()

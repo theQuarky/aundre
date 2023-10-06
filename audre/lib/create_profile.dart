@@ -95,7 +95,6 @@ class _CreateProfileState extends State<CreateProfile> {
           .child('${user!.uid}/picture.png');
       await ref.putFile(_pickedImage!);
       final url = await ref.getDownloadURL();
-      print('URL: $url');
       setState(() {
         profilePictureUrl = url;
       });

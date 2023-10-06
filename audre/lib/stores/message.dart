@@ -46,13 +46,25 @@ abstract class MessageStoreBase with Store {
   }
 
   @action
+  updateMessage(Map<String, dynamic> message) {
+    final temp = messages;
+    messages = [];
+    messages = temp
+        .map((e) => e['message_id'] == message['message_id'] ? message : e)
+        .toList();
+    final index = messages.indexWhere(
+        (element) => element['message_id'] == message['message_id']);
+    print('new message ${messages[index]}');
+    // hydrateMessages();
+  }
+
+  @action
   void hydrateMessages() {
     String uid = FirebaseUserProvider.getUser()!.uid;
     MessagesGraphQLService.getMessages(uid: uid, page: messagePage)
         .then((value) {
       if (value != null) {
         messages = [...messages, ...value];
-
         // remove duplicates from messages where message_id is same
         Set<String> uniqueIds = {};
         List<Map<String, dynamic>> uniqueList = [];

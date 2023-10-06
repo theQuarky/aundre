@@ -12,6 +12,44 @@ export const socketService = (
 ) => {
   const messageChangeStream = MessageModel.watch();
   messageChangeStream.on("change", async (change) => {
+    // console.log(`update_message ${change.operationType}`);
+    // if (change.operationType === "update") {
+    //   const change_id = change.documentKey._id;
+
+    //   const message = await MessageModel.findOne({
+    //     _id: change_id,
+    //   });
+
+    //   const sender = await UserModel.findOne({
+    //     uid: message.sender,
+    //   });
+
+    //   const data = {
+    //     message_id: message.message_id,
+    //     chat_id: message.chat_id,
+    //     sender_id: message.sender,
+    //     partner_id: message.receiver,
+    //     message: message.message,
+    //     sender: sender,
+    //     created_at: Math.floor(
+    //       new Date(message.created_at).getTime()
+    //     ).toString(),
+    //     seenBy: message.seenBy,
+    //   };
+
+    //   const emitTo = [];
+
+    //   if (rooms[message.receiver] !== undefined) {
+    //     emitTo.push(rooms[message.receiver]);
+    //   }
+
+    //   if (rooms[message.sender] !== undefined) {
+    //     emitTo.push(rooms[message.sender]);
+    //   }
+
+    //   socket.to(emitTo).emit("update_message", data);
+    // }
+
     if (change.operationType === "insert") {
       const sender = await UserModel.findOne({
         uid: change.fullDocument.sender,
@@ -27,6 +65,7 @@ export const socketService = (
         created_at: Math.floor(
           new Date(change.fullDocument.created_at).getTime()
         ).toString(),
+        seenBy: change.fullDocument.seenBy,
       };
 
       const emitTo = [];
@@ -50,6 +89,75 @@ export const socketService = (
         socket.join(socket.id); // Join the socket room
       }
       console.log(`ROOMS: ${JSON.stringify(rooms)}`);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  socket.on("seen", async (data) => {
+    try {
+      console.log("seen event called");
+
+      const { uid, message_id } = data;
+
+      if (message_id === null) return;
+      if (uid === null) return;
+      console.log("Checkpoint -1");
+      const messages = await MessageModel.findOne({
+        message_id,
+      });
+      console.log("Checkpoint 0 : ", messages);
+      let seenBy = messages.seenBy;
+      console.log("Checkpoint 0.5 : ", seenBy, uid);
+
+      console.log("Checkpoint 1 : ", seenBy);
+      seenBy.push({
+        uid,
+        seenAt: Math.floor(new Date().getTime()).toString(),
+      });
+
+      // keep only unique values in array
+      seenBy = seenBy.filter(
+        (thing: any, index: any, self: any) =>
+          index === self.findIndex((t: any) => t.uid === thing.uid)
+      );
+
+      console.log("Checkpoint 2 : ", seenBy);
+      await MessageModel.updateOne({ message_id }, { $set: { seenBy } });
+      console.log("Checkpoint 3 : ", seenBy);
+
+      const message = await MessageModel.findOne({
+        message_id,
+      });
+
+      const sender = await UserModel.findOne({
+        uid: message.sender,
+      });
+
+      const _data = {
+        message_id: message.message_id,
+        chat_id: message.chat_id,
+        sender_id: message.sender,
+        partner_id: message.receiver,
+        message: message.message,
+        sender: sender,
+        created_at: Math.floor(
+          new Date(message.created_at).getTime()
+        ).toString(),
+        seenBy: message.seenBy,
+      };
+
+      const emitTo = [];
+
+      if (rooms[message.receiver] !== undefined) {
+        emitTo.push(rooms[message.receiver]);
+      }
+
+      if (rooms[message.sender] !== undefined) {
+        emitTo.push(rooms[message.sender]);
+      }
+
+      socket.to(emitTo).emit("update_message", _data);
     } catch (error) {
       console.log(error);
     }
@@ -86,19 +194,26 @@ export const socketService = (
       } else {
         chat = await ChatModel.findOne({ chat_id });
       }
-      console.log(chat);
 
       if (chat === null) throw new Error("Chat not found");
 
       const messageData = {
         chat_id: chat.chat_id,
         message_id: uuidv4(),
-        message,
+        message:
+          message.message == null && message.media_url != null
+            ? ""
+            : message.message,
         sender: sender_id,
         receiver: partner_id,
+        seenBy: [
+          {
+            uid: sender_id,
+            seenAt: Math.floor(new Date().getTime()).toString(),
+          },
+        ],
+        media: message.media_url,
       };
-
-      console.log(messageData);
 
       const _message = await MessageModel.create(messageData);
 

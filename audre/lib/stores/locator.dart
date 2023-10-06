@@ -5,7 +5,7 @@ class _Locator {
 
   void setup() {
     // setup dependencies
-    messageStore.hydrateMessages();
+    // messageStore.hydrateMessages();
   }
 }
 

@@ -27,8 +27,25 @@ class SocketService {
         'message': data['message'],
         'sender': data['sender'],
         'created_at': data['created_at'],
+        'seenBy': data['seenBy'],
       };
       locator.messageStore.addMessage(message);
+    });
+
+    socket!.on('update_message', (data) {
+      // print('update_message');
+      final Map<String, dynamic> message = {
+        'message_id': data['message_id'],
+        'chat_id': data['chat_id'],
+        'partner_id': data['partner_id'],
+        'sender_id': data['sender_id'],
+        'message': data['message'],
+        'sender': data['sender'],
+        'created_at': data['created_at'],
+        'seenBy': data['seenBy'],
+      };
+      // locator.messageStore.hydrateChats();
+      locator.messageStore.updateMessage(message);
     });
   }
 }
